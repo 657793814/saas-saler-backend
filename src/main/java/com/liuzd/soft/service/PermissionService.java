@@ -1,11 +1,11 @@
 package com.liuzd.soft.service;
 
 import com.liuzd.soft.dto.TPermissionDto;
+import com.liuzd.soft.dto.TRolePermissionDto;
 import com.liuzd.soft.vo.page.PageResult;
-import com.liuzd.soft.vo.permission.AddPermissionReq;
-import com.liuzd.soft.vo.permission.DelPermissionReq;
-import com.liuzd.soft.vo.permission.EditPermissionReq;
-import com.liuzd.soft.vo.permission.PermissionPageReq;
+import com.liuzd.soft.vo.permission.*;
+
+import java.util.List;
 
 /**
  * @author:liuzd01
@@ -18,10 +18,16 @@ public interface PermissionService {
 
     PageResult<TPermissionDto> pageQuery(PermissionPageReq pageRequest);
 
+    List<TPermissionDto> all();
+
+    List<TRolePermissionDto> queryPermissionByRole(Integer roleId);
+
     void add(AddPermissionReq addRoleReq);
 
     void edit(EditPermissionReq editRoleReq);
 
     void del(DelPermissionReq delPermissionReq);
+
+    void editRolePermission(EditRolePermissionReq req);
 
 }

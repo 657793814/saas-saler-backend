@@ -6,22 +6,19 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.liuzd.soft.annotation.LogAnnotation;
-import com.liuzd.soft.consts.GlobalConstant;
-import com.liuzd.soft.context.ThreadContextHolder;
 import com.liuzd.soft.dao.TPermissionDao;
+import com.liuzd.soft.dao.TRolePermissionDao;
 import com.liuzd.soft.dao.TUserRoleDao;
 import com.liuzd.soft.dto.TPermissionDto;
-import com.liuzd.soft.dto.token.TokenInfo;
+import com.liuzd.soft.dto.TRolePermissionDto;
 import com.liuzd.soft.entity.TPermissionEntity;
+import com.liuzd.soft.entity.TRolePermissionEntity;
 import com.liuzd.soft.entity.TUserRoleEntity;
 import com.liuzd.soft.enums.RetEnums;
 import com.liuzd.soft.exception.MyException;
 import com.liuzd.soft.service.PermissionService;
 import com.liuzd.soft.vo.page.PageResult;
-import com.liuzd.soft.vo.permission.AddPermissionReq;
-import com.liuzd.soft.vo.permission.DelPermissionReq;
-import com.liuzd.soft.vo.permission.EditPermissionReq;
-import com.liuzd.soft.vo.permission.PermissionPageReq;
+import com.liuzd.soft.vo.permission.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -40,14 +37,29 @@ public class PermissionServiceImpl implements PermissionService {
 
     final TPermissionDao tPermissionDao;
     final TUserRoleDao tUserRoleDao;
+    final TRolePermissionDao tRolePermissionDao;
+    final UserServiceImpl userServiceImpl;
 
 
-    public PermissionServiceImpl(TPermissionDao tPermissionDao, TUserRoleDao tUserRoleDao) {
+    public PermissionServiceImpl(TPermissionDao tPermissionDao, TUserRoleDao tUserRoleDao, TRolePermissionDao tRolePermissionDao, UserServiceImpl userServiceImpl) {
         this.tPermissionDao = tPermissionDao;
 
         this.tUserRoleDao = tUserRoleDao;
+        this.tRolePermissionDao = tRolePermissionDao;
+        this.userServiceImpl = userServiceImpl;
     }
 
+    @Override
+    public List<TPermissionDto> all() {
+        List<TPermissionEntity> list = tPermissionDao.selectList(new QueryWrapper<>());
+        return list.stream().map(TPermissionDto::new).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<TRolePermissionDto> queryPermissionByRole(Integer roleId) {
+        List<TRolePermissionEntity> list = tRolePermissionDao.selectList(new QueryWrapper<TRolePermissionEntity>().eq("role_id", roleId));
+        return list.stream().map(TRolePermissionDto::new).collect(Collectors.toList());
+    }
 
     /**
      * 分页查询一级节点
@@ -119,17 +131,45 @@ public class PermissionServiceImpl implements PermissionService {
     @LogAnnotation
     @Override
     public void del(DelPermissionReq delPermissionReq) {
-
-        //只有管理员可以删除
-        TokenInfo tokenInfo = (TokenInfo) ThreadContextHolder.get(GlobalConstant.LOGIN_USER_INFO);
-        QueryWrapper queryWrapper = new QueryWrapper<TUserRoleEntity>();
-        queryWrapper.eq("openid", tokenInfo.getOpenid());
-        queryWrapper.eq("role_id", GlobalConstant.DEFAULT_ADMIN_ROLE_ID);
-        TUserRoleEntity tUserRoleEntity = tUserRoleDao.selectOne(queryWrapper);
-        Assert.notNull(tUserRoleEntity, () -> MyException.exception(RetEnums.NO_PERMISSION));
-
-        log.info("openid:{} 操作删除了权限点。 data:{}", tokenInfo.getOpenid(), delPermissionReq);
-
+        if (!userServiceImpl.checkCurrentUserIsAdmin()) {
+            throw MyException.exception(RetEnums.NO_PERMISSION);
+        }
         tPermissionDao.delete(new QueryWrapper<TPermissionEntity>().eq("id", delPermissionReq.getId()));
+    }
+
+    @LogAnnotation
+    @Override
+    public void editRolePermission(EditRolePermissionReq req) {
+        if (!userServiceImpl.checkCurrentUserIsAdmin()) {
+            throw MyException.exception(RetEnums.NO_PERMISSION);
+        }
+
+        //清空权限
+        if (CollUtil.isEmpty(req.getPermissionIds())) {
+            tUserRoleDao.delete(new QueryWrapper<TUserRoleEntity>().eq("role_id", req.getRoleId()));
+        }
+
+        //获取当前角色权限点，对比更新
+        List<TRolePermissionEntity> list = tRolePermissionDao.selectList(new QueryWrapper<TRolePermissionEntity>().eq("role_id", req.getRoleId()));
+        List<Integer> oldPermissionIds = list.stream().map(TRolePermissionEntity::getPermissionId).collect(Collectors.toList());
+
+        List<Integer> newPermissionIds = req.getPermissionIds();
+        List<Integer> addPermissionIds = newPermissionIds.stream().filter(permissionId -> !oldPermissionIds.contains(permissionId)).collect(Collectors.toList());
+        List<Integer> delPermissionIds = oldPermissionIds.stream().filter(permissionId -> !newPermissionIds.contains(permissionId)).collect(Collectors.toList());
+        log.info("addPermissionIds:{}", addPermissionIds);
+        log.info("delPermissionIds:{}", delPermissionIds);
+        if (CollUtil.isNotEmpty(addPermissionIds)) {
+            for (Integer permissionId : addPermissionIds) {
+                TRolePermissionEntity entity = new TRolePermissionEntity();
+                entity.setRoleId(req.getRoleId());
+                entity.setPermissionId(permissionId);
+                tRolePermissionDao.insert(entity);
+            }
+        }
+
+        if (CollUtil.isNotEmpty(delPermissionIds)) {
+            tRolePermissionDao.delete(new QueryWrapper<TRolePermissionEntity>().eq("role_id", req.getRoleId()).in("permission_id", delPermissionIds));
+        }
+
     }
 }

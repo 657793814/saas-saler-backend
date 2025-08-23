@@ -6,16 +6,12 @@ import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.liuzd.soft.annotation.LogAnnotation;
+import com.liuzd.soft.consts.GlobalConstant;
 import com.liuzd.soft.context.ThreadContextHolder;
-import com.liuzd.soft.dao.TUserDao;
-import com.liuzd.soft.dao.TenantsDao;
-import com.liuzd.soft.dao.UserToTenantDao;
-import com.liuzd.soft.dao.UsersDao;
+import com.liuzd.soft.dao.*;
+import com.liuzd.soft.dto.token.TokenInfo;
 import com.liuzd.soft.dto.token.UserTokenInfo;
-import com.liuzd.soft.entity.TUserEntity;
-import com.liuzd.soft.entity.TenantsEntity;
-import com.liuzd.soft.entity.UserToTenantEntity;
-import com.liuzd.soft.entity.UsersEntity;
+import com.liuzd.soft.entity.*;
 import com.liuzd.soft.enums.RetEnums;
 import com.liuzd.soft.exception.MyException;
 import com.liuzd.soft.mq.UserMQProducerService;
@@ -51,6 +47,7 @@ public class UserServiceImpl extends ServiceImpl<TUserDao, TUserEntity> implemen
     final UserToTenantDao userToTenantDao;
     final UsersDao usersDao;
     final TenantsDao tenantsDao;
+    final TUserRoleDao tUserRoleDao;
     final UserMQProducerService userMQProducerService;
     final LoginServiceImpl loginServiceImpl;
 
@@ -182,5 +179,15 @@ public class UserServiceImpl extends ServiceImpl<TUserDao, TUserEntity> implemen
         loginServiceImpl.delToken(userTokenInfo.getToken());
         loginServiceImpl.delRefreshToken(userTokenInfo.getRefreshToken());
         loginServiceImpl.delUserTokenInfo(openid);
+    }
+
+    public boolean checkCurrentUserIsAdmin() {
+        //只有管理员可以删除
+        TokenInfo tokenInfo = (TokenInfo) ThreadContextHolder.get(GlobalConstant.LOGIN_USER_INFO);
+        QueryWrapper queryWrapper = new QueryWrapper<TUserRoleEntity>();
+        queryWrapper.eq("openid", tokenInfo.getOpenid());
+        queryWrapper.eq("role_id", GlobalConstant.DEFAULT_ADMIN_ROLE_ID);
+        TUserRoleEntity tUserRoleEntity = tUserRoleDao.selectOne(queryWrapper);
+        return Objects.nonNull(tUserRoleEntity);
     }
 }

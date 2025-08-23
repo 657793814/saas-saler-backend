@@ -2,6 +2,7 @@ package com.liuzd.soft.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.liuzd.soft.entity.TRolePermissionEntity;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -28,4 +29,9 @@ public class TRolePermissionDto {
     @JsonProperty(value = "permission_id")
     private Integer permissionId;
 
+    public TRolePermissionDto(TRolePermissionEntity tRolePermissionEntity) {
+        this.id = tRolePermissionEntity.getId();
+        this.roleId = tRolePermissionEntity.getRoleId();
+        this.permissionId = tRolePermissionEntity.getPermissionId();
+    }
 }
