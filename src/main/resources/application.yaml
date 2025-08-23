@@ -1,0 +1,49 @@
+# 本地环境使用dev,容器云部署环境请配置容器云环境变量 SPRING_PROFILES_ACTIVE=具体环境值
+# 1. 命令行参数 java -jar myapp.jar --spring.profiles.active=dev
+# 2. 环境变量 export SPRING_PROFILES_ACTIVE=prod ， java -jar myapp.jar 运行jar包时自动加载环境变量
+# 3. 配置文件 spring.profiles.active=dev
+application:
+  name: liuzd-soft-demo
+
+# tomcat config
+server:
+  tomcat:
+    socket:
+      # 处理 mac os 版本问题导致的 fd bug
+      linger-enable: true # org.apache.tomcat.util.net.SocketProperties.soLingerOn
+
+# spring server config
+spring:
+  profiles:
+    active: dev
+  application:
+    name: ${application.name}-${spring.profiles.active}
+  jackson:
+    deserialization:
+      ACCEPT_EMPTY_STRING_AS_NULL_OBJECT: true
+  docker:
+    compose:
+      enable: false
+      files: compose.yml
+  devtools:
+    add-properties: false
+  multipart:
+    enabled: true
+    max-file-size: 10MB
+    max-request-size: 10MB
+
+# log config
+logging:
+  level:
+    web: INFO
+  file:
+    path: ./data/logs
+
+# mybatis-plus config
+mybatis-plus:
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: com.liuzd.soft.entity
+  configuration:
+    map-underscore-to-camel-case: true
+    cache-enabled: false
+    log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl
