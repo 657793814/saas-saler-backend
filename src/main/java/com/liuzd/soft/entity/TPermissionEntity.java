@@ -48,5 +48,9 @@ public class TPermissionEntity implements Serializable {
     @TableField(value = "`enable`")
     private Integer enable;
 
+
+    @TableField(value = "`order`")
+    private Integer order;
+
 }
 

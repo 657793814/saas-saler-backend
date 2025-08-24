@@ -1,8 +1,6 @@
 package com.liuzd.soft.interceptor;
 
 import cn.hutool.core.util.ObjectUtil;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableSet;
 import com.liuzd.soft.config.DynamicDataSource;
 import com.liuzd.soft.consts.GlobalConstant;
@@ -20,12 +18,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
-import org.springframework.util.StreamUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.HandlerInterceptor;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.Set;
 import java.util.UUID;
@@ -101,46 +97,16 @@ public class MyWebInterceptor implements HandlerInterceptor {
         //验证token
         checkToken(request);
     }
-
-    /**
-     * 获取请求体内容
-     * 在Servlet API中，请求体是一个 InputStream 时只能被读取一次。当拦截器读取了请求体后接口将无法获取
-     * 此处通过 MultiReadHttpServletRequest 包装一下，可以多次获取
-     *
-     * @param request
-     * @return
-     * @throws IOException
-     */
-    private String getBody(HttpServletRequest request) throws IOException {
-        String body = "";
-        if ("POST".equalsIgnoreCase(request.getMethod()) || "PUT".equalsIgnoreCase(request.getMethod())) {
-            if (request instanceof ContentCachingFilter.MultiReadHttpServletRequest) {
-                body = ((ContentCachingFilter.MultiReadHttpServletRequest) request).getBody();
-            } else {
-                body = StreamUtils.copyToString(request.getInputStream(), StandardCharsets.UTF_8);
-            }
-        }
-        return body;
-    }
-
+    
     private void checkToken(HttpServletRequest request) throws IOException {
         if (matchUriPrefix(request.getRequestURI(), NO_TOKEN_URI_PREFIXES)) {
             return;
         }
 
-        String body = getBody(request);
-        log.debug("Request body: {}", body);
-        ObjectMapper mapper = new ObjectMapper();
-        JsonNode jsonNode = mapper.readTree(body);
-
-        String token = jsonNode.has(GlobalConstant.REQUEST_PARAM_TOKEN_KEY) ?
-                jsonNode.get(GlobalConstant.REQUEST_PARAM_TOKEN_KEY).asText() : null;
-        long timestamp = jsonNode.has(GlobalConstant.REQUEST_PARAM_TIMESTAMP_KEY) ?
-                jsonNode.get(GlobalConstant.REQUEST_PARAM_TIMESTAMP_KEY).asLong() : 0L;
-        String randStr = jsonNode.has(GlobalConstant.REQUEST_PARAM_RAND_STR_KEY) ?
-                jsonNode.get(GlobalConstant.REQUEST_PARAM_RAND_STR_KEY).asText() : null;
-        String sign = jsonNode.has(GlobalConstant.REQUEST_PARAM_SIGN_KEY) ?
-                jsonNode.get(GlobalConstant.REQUEST_PARAM_SIGN_KEY).asText() : null;
+        String token = request.getParameter(GlobalConstant.REQUEST_PARAM_TOKEN_KEY);
+        long timestamp = Long.parseLong(request.getParameter(GlobalConstant.REQUEST_PARAM_TIMESTAMP_KEY));
+        String randStr = request.getParameter(GlobalConstant.REQUEST_PARAM_RAND_STR_KEY);
+        String sign = request.getParameter(GlobalConstant.REQUEST_PARAM_SIGN_KEY);
 
         //10分钟实效性，防抓链接攻击
         if (timestamp - (System.currentTimeMillis() / 1000) > 600) {
