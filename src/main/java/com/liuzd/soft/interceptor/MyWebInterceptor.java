@@ -97,8 +97,8 @@ public class MyWebInterceptor implements HandlerInterceptor {
         //验证token
         checkToken(request);
     }
-    
-    private void checkToken(HttpServletRequest request) throws IOException {
+
+    private void checkToken(HttpServletRequest request) {
         if (matchUriPrefix(request.getRequestURI(), NO_TOKEN_URI_PREFIXES)) {
             return;
         }

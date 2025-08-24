@@ -32,11 +32,14 @@ public class InterceptorConfig implements WebMvcConfigurer {
         //addPathPatterns拦截的路径
         String[] addPathPatterns = {"/**"};
         //excludePathPatterns排除的路径
-        String[] excludePathPatterns = {};
+        String[] excludePathPatterns = {"/minio/**"};
+
         MyWebInterceptor myWebInterceptor = new MyWebInterceptor();
         myWebInterceptor.setDynamicDataSource(dynamicDataSource);
         myWebInterceptor.setLoginServiceImpl(loginServiceImpl);
-        registry.addInterceptor(myWebInterceptor).addPathPatterns(addPathPatterns).excludePathPatterns(excludePathPatterns);
+        registry.addInterceptor(myWebInterceptor)
+                .addPathPatterns(addPathPatterns)
+                .excludePathPatterns(excludePathPatterns);
 
     }
 

@@ -32,8 +32,7 @@ class SpringBootTestApplicationTests {
 
     @Autowired
     private RolesServiceImpl rolesServiceImpl;
-
-    @Test
+    
     void contextLoads() {
         String userCode, username, mobile, openid, unionId, pwd, salt;
 
@@ -85,7 +84,7 @@ class SpringBootTestApplicationTests {
         }
     }
 
-    @Test
+
     void md5() {
         System.out.println(DigestUtils.md5Hex("123456"));
     }

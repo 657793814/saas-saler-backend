@@ -1,5 +1,6 @@
 package com.liuzd.soft.config;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -7,6 +8,8 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
+import org.springframework.web.context.request.ServletRequestAttributes;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Arrays;
 
@@ -33,8 +36,9 @@ public class LoggingAspectConfig {
         String className = joinPoint.getTarget().getClass().getSimpleName();
         Object[] args = joinPoint.getArgs();
 
-        // 打印入参
-        log.info("Entering method: {}.{} with arguments: {}", className, methodName, Arrays.toString(args));
+        // 打印入参，但过滤掉可能导致类型转换问题的对象
+        Object[] safeArgs = filterRequestObjects(args);
+        log.info("Entering method: {}.{} with arguments: {}", className, methodName, Arrays.toString(safeArgs));
 
         long startTime = System.currentTimeMillis();
         Object result = null;
@@ -49,5 +53,40 @@ public class LoggingAspectConfig {
         }
 
         return result;
+    }
+
+    /**
+     * 过滤掉可能导致类型转换问题的请求对象
+     *
+     * @param args 原始参数数组
+     * @return 安全的参数数组
+     */
+    private Object[] filterRequestObjects(Object[] args) {
+        return Arrays.stream(args)
+                .map(this::convertIfNecessary)
+                .toArray();
+    }
+
+    /**
+     * 转换可能导致问题的对象
+     *
+     * @param arg 原始参数
+     * @return 转换后的参数
+     */
+    private Object convertIfNecessary(Object arg) {
+        // 如果是MultipartFile类型，只返回文件名等基本信息
+        if (arg instanceof MultipartFile) {
+            MultipartFile file = (MultipartFile) arg;
+            return String.format("MultipartFile(name=%s, originalName=%s, size=%d, contentType=%s)",
+                    file.getName(), file.getOriginalFilename(), file.getSize(), file.getContentType());
+        }
+
+        // 如果是ServletRequest相关对象，返回简单的标识
+        if (arg instanceof HttpServletRequest || arg instanceof ServletRequestAttributes) {
+            return arg.getClass().getSimpleName() + "(filtered)";
+        }
+
+        // 其他类型保持不变
+        return arg;
     }
 }
