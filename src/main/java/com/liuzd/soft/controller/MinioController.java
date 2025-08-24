@@ -16,6 +16,8 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.net.URLEncoder;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * MinIO文件管理控制器
@@ -53,8 +55,11 @@ public class MinioController {
             boolean uploaded = minioService.uploadFile(file, objectName);
             if (uploaded) {
                 // 获取文件访问URL
-                //String fileUrl = minioService.getFileUrl(objectName);
-                return ResultMessage.success(objectName);
+                String fileUrl = minioService.getFileUrl(objectName);
+                Map<String, String> data = new ConcurrentHashMap<>();
+                data.put("url", fileUrl);
+                data.put("path", objectName);
+                return ResultMessage.success(data);
             } else {
                 return ResultMessage.fail(RetEnums.FAIL.getCode(), "文件上传失败");
             }
