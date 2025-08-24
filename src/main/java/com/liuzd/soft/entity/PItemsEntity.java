@@ -4,8 +4,9 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import com.google.type.Decimal;
 import lombok.Data;
+
+import java.math.BigDecimal;
 
 /**
  * 中心库商品 sku
@@ -29,10 +30,10 @@ public class PItemsEntity {
     private String img;
 
     @TableField(value = "`sale_price`")
-    private Decimal salePrice;
+    private BigDecimal salePrice;
 
     @TableField(value = "`cost_price`")
-    private Decimal costPrice;
+    private BigDecimal costPrice;
 
     @TableField(value = "`spec_data`")
     private String specData;

@@ -1,5 +1,6 @@
 package com.liuzd.soft.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.liuzd.soft.vo.product.CreateProductReq;
 
 /**
@@ -10,5 +11,5 @@ import com.liuzd.soft.vo.product.CreateProductReq;
  */
 public interface ProductService {
 
-    void createProduct(CreateProductReq createProductReq);
+    void createProduct(CreateProductReq createProductReq) throws JsonProcessingException;
 }

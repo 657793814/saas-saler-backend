@@ -37,4 +37,8 @@ public class IdUtils {
     public static String generateUnionId() {
         return GlobalConstant.UNION_ID_PREFIX + TokenUtils.generateStr(23);
     }
+
+    public static String generateProductCode() {
+        return GlobalConstant.PRODUCT_ID_PREFIX + TokenUtils.generateStr(7);
+    }
 }

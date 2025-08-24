@@ -24,6 +24,7 @@ import com.liuzd.soft.vo.role.AddRoleReq;
 import com.liuzd.soft.vo.role.EditRoleReq;
 import com.liuzd.soft.vo.role.RolePageReq;
 import jodd.util.StringUtil;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -43,20 +44,14 @@ import java.util.stream.Stream;
  */
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class RolesServiceImpl implements RolesService {
 
     final TPermissionDao tPermissionDao;
     final TUserRoleDao tUserRoleDao;
     final TRolePermissionDao tRolePermissionDao;
     final TRoleDao tRoleDao;
-
-    public RolesServiceImpl(TPermissionDao tPermissionDao, TUserRoleDao tUserRoleDao, TRolePermissionDao tRolePermissionDao, TRoleDao tRoleDao) {
-        this.tPermissionDao = tPermissionDao;
-        this.tUserRoleDao = tUserRoleDao;
-        this.tRolePermissionDao = tRolePermissionDao;
-        this.tRoleDao = tRoleDao;
-    }
-
+    
 
     @LogAnnotation
     public List<TPermissionDto> queryUserMenus(String openid) {

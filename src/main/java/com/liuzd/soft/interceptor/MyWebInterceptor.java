@@ -19,6 +19,7 @@ import org.slf4j.MDC;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.servlet.HandlerInterceptor;
 
 import java.io.IOException;
@@ -103,6 +104,11 @@ public class MyWebInterceptor implements HandlerInterceptor {
             return;
         }
 
+        // 如果是multipart请求，跳过token验证
+        if (isMultipartRequest(request)) {
+            return;
+        }
+
         String token = request.getParameter(GlobalConstant.REQUEST_PARAM_TOKEN_KEY);
         long timestamp = Long.parseLong(request.getParameter(GlobalConstant.REQUEST_PARAM_TIMESTAMP_KEY));
         String randStr = request.getParameter(GlobalConstant.REQUEST_PARAM_RAND_STR_KEY);
@@ -131,6 +137,18 @@ public class MyWebInterceptor implements HandlerInterceptor {
         //校验成功 将tokenInfo 设置到线程上下文中
         ThreadContextHolder.put(GlobalConstant.LOGIN_USER_INFO, tokenInfo);
 
+    }
+
+    /**
+     * 判断是否为multipart请求
+     *
+     * @param request
+     * @return
+     */
+    private boolean isMultipartRequest(HttpServletRequest request) {
+        return request instanceof MultipartHttpServletRequest ||
+                (request.getContentType() != null &&
+                        request.getContentType().startsWith("multipart/"));
     }
 
     /**

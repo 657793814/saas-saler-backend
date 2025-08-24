@@ -6,8 +6,6 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
-import java.sql.Date;
-
 /**
  * 中心库商品主表
  *
@@ -45,7 +43,7 @@ public class PProductsEntity {
     private Integer enable;
 
     @TableField(value = "`create_time`")
-    private Date createTime;
+    private String createTime;
 
     @TableField(value = "`create_user`")
     private String createUser;

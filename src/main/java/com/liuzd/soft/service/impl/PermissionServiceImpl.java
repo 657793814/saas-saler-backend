@@ -19,6 +19,7 @@ import com.liuzd.soft.exception.MyException;
 import com.liuzd.soft.service.PermissionService;
 import com.liuzd.soft.vo.page.PageResult;
 import com.liuzd.soft.vo.permission.*;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -33,21 +34,13 @@ import java.util.stream.Collectors;
  */
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class PermissionServiceImpl implements PermissionService {
 
     final TPermissionDao tPermissionDao;
     final TUserRoleDao tUserRoleDao;
     final TRolePermissionDao tRolePermissionDao;
     final UserServiceImpl userServiceImpl;
-
-
-    public PermissionServiceImpl(TPermissionDao tPermissionDao, TUserRoleDao tUserRoleDao, TRolePermissionDao tRolePermissionDao, UserServiceImpl userServiceImpl) {
-        this.tPermissionDao = tPermissionDao;
-
-        this.tUserRoleDao = tUserRoleDao;
-        this.tRolePermissionDao = tRolePermissionDao;
-        this.userServiceImpl = userServiceImpl;
-    }
 
     @Override
     public List<TPermissionDto> all() {

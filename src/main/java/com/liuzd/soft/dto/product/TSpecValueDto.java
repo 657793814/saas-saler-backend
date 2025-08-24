@@ -1,12 +1,9 @@
 package com.liuzd.soft.dto.product;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.liuzd.soft.vo.product.SpecInfo;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.math.BigDecimal;
 
 /**
  * @author: liuzd
@@ -18,13 +15,8 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonSerialize
-public class PItemsDto {
+public class TSpecValueDto {
     private Integer id;
-    private Integer productId;
-    private String img;
-    private BigDecimal salePrice;
-    private BigDecimal costPrice;
-    private String specData;
-    private SpecInfo specInfo;
-    private Integer stock;
+    private Integer specTypeId;
+    private String value;
 }

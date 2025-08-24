@@ -9,8 +9,11 @@ public class GlobalConstant {
     public final static String CONFIG_DB_NAME = "saas_center";  //默认库
     public final static String OPENID_PREFIX = "openid_";
     public final static String UNION_ID_PREFIX = "unionid_";
+    public final static String PRODUCT_ID_PREFIX = "spu";
     public final static String TEST_SMS_CODE = "9527";
     public final static String LOGIN_USER_INFO = "loginUserInfo"; //登录成功后写入登录用户数据
+    public final static String SPEC_TYPE_PREFIX = "tmp_type_";
+    public final static String SPEC_VALUE_PREFIX = "tmp_value_";
 
     public final static String TOKEN_CACHE_PREFIX = "token:";
     public final static String REFRESH_TOKEN_CACHE_PREFIX = "refreshToken:";

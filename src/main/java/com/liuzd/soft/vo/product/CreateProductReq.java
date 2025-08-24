@@ -3,7 +3,6 @@ package com.liuzd.soft.vo.product;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 import java.util.List;
@@ -18,22 +17,21 @@ import java.util.List;
 @JsonSerialize
 public class CreateProductReq {
 
-    @NotBlank(message = "商品标题不能为空")
     @JsonProperty("title")
+    @NotBlank(message = "标题不能为空")
     private String name;
 
-    @NotBlank(message = "商品简介不能为空")
     @JsonProperty("summary")
+    @NotBlank(message = "简介不能为空")
     private String desc;
 
-    @NotBlank(message = "商品详情描述不能为空")
     @JsonProperty("description")
     private String detail;
 
-    @NotNull(message = "商品图片不能为空")
+    @JsonProperty("imageUrls")
     private List<String> imageUrls;
 
-    @NotNull(message = "商品sku不能为空")
+    @JsonProperty("skus")
     private List<SkuInfo> skus;
 
 }
