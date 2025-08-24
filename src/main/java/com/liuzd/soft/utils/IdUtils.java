@@ -39,6 +39,10 @@ public class IdUtils {
     }
 
     public static String generateProductCode() {
-        return GlobalConstant.PRODUCT_ID_PREFIX + TokenUtils.generateStr(7);
+        return GlobalConstant.PRODUCT_ID_PREFIX + TokenUtils.generateStr(7) + System.currentTimeMillis();
+    }
+
+    public static String generateSkuCode() {
+        return GlobalConstant.SKU_ID_PREFIX + TokenUtils.generateStr(7) + System.currentTimeMillis();
     }
 }

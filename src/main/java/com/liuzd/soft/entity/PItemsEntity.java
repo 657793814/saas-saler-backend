@@ -26,6 +26,10 @@ public class PItemsEntity {
     @TableField(value = "`product_id`")
     private Integer productId;
 
+
+    @TableField(value = "`code`")
+    private String code;
+
     @TableField(value = "`img`")
     private String img;
 
@@ -40,5 +44,8 @@ public class PItemsEntity {
 
     @TableField(value = "`stock`")
     private Integer stock;
+    
+    @TableField(value = "`enable`")
+    private Integer enable;
 
 }

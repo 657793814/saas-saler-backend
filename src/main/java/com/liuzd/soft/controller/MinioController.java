@@ -53,8 +53,8 @@ public class MinioController {
             boolean uploaded = minioService.uploadFile(file, objectName);
             if (uploaded) {
                 // 获取文件访问URL
-                String fileUrl = minioService.getFileUrl(objectName);
-                return ResultMessage.success(fileUrl);
+                //String fileUrl = minioService.getFileUrl(objectName);
+                return ResultMessage.success(objectName);
             } else {
                 return ResultMessage.fail(RetEnums.FAIL.getCode(), "文件上传失败");
             }

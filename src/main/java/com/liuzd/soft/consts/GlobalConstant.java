@@ -10,6 +10,7 @@ public class GlobalConstant {
     public final static String OPENID_PREFIX = "openid_";
     public final static String UNION_ID_PREFIX = "unionid_";
     public final static String PRODUCT_ID_PREFIX = "spu";
+    public final static String SKU_ID_PREFIX = "sku";
     public final static String TEST_SMS_CODE = "9527";
     public final static String LOGIN_USER_INFO = "loginUserInfo"; //登录成功后写入登录用户数据
     public final static String SPEC_TYPE_PREFIX = "tmp_type_";

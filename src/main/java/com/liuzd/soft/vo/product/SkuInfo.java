@@ -17,13 +17,16 @@ import java.util.List;
 @JsonSerialize
 public class SkuInfo {
 
+    @JsonProperty(value = "image", defaultValue = "")
+    private String image;
+
     @JsonProperty("price")
     private BigDecimal salePrice;
 
-    @JsonProperty("costPrice")
+    @JsonProperty(value = "costPrice", defaultValue = "0.00")
     private BigDecimal costPrice;
 
-    @JsonProperty("stock")
+    @JsonProperty(value = "stock", defaultValue = "0")
     private Integer stock;
 
     @JsonProperty("specifications")

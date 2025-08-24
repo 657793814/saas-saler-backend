@@ -17,6 +17,8 @@ import java.util.List;
 @JsonSerialize
 public class CreateProductReq {
 
+    private Integer id;
+
     @JsonProperty("title")
     @NotBlank(message = "标题不能为空")
     private String name;

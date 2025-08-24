@@ -13,4 +13,8 @@ import lombok.Data;
 @Data
 @JsonSerialize
 public class ProductPageReq extends PageRequest {
+
+    private String name;
+    private String code;
+    private Boolean enable;
 }
