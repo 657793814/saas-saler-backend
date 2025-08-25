@@ -411,10 +411,12 @@ public class ProductServiceImpl implements ProductService {
         productsDao.updateById(product);
 
         //批量更新商品sku状态
+        /*
         UpdateWrapper<PItemsEntity> updateWrapper = new UpdateWrapper<>();
         updateWrapper.eq("product_id", req.getProductId());
         updateWrapper.set("enable", req.getEnable());
         itemsDao.update(null, updateWrapper);
+         */
     }
 
     @Override
