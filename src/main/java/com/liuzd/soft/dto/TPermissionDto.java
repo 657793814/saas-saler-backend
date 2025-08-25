@@ -48,6 +48,9 @@ public class TPermissionDto {
     @JsonProperty(value = "children")
     private List<TPermissionDto> children;
 
+    @JsonProperty(value = "order")
+    private Integer order;
+
 
     public TPermissionDto(TPermissionEntity tPermissionEntity) {
         this.id = tPermissionEntity.getId();
@@ -57,6 +60,7 @@ public class TPermissionDto {
         this.icon = tPermissionEntity.getIcon();
         this.enable = tPermissionEntity.getEnable();
         this.parentCode = tPermissionEntity.getParentCode();
+        this.order = tPermissionEntity.getOrder();
 
     }
 }

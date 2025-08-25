@@ -83,6 +83,7 @@ public class PermissionServiceImpl implements PermissionService {
         List<String> parentCodes = list.stream().map(TPermissionEntity::getCode).collect(Collectors.toList());
         QueryWrapper<TPermissionEntity> queryWrapper1 = new QueryWrapper<>();
         queryWrapper1.in("parent_code", parentCodes);
+        queryWrapper1.orderByAsc("parent_code").orderByDesc("`order`");
         List<TPermissionEntity> childrenList = tPermissionDao.selectList(queryWrapper1);
         if (CollUtil.isNotEmpty(childrenList)) {
             list.addAll(childrenList);
@@ -100,6 +101,7 @@ public class PermissionServiceImpl implements PermissionService {
         tPermissionEntity.setIcon(addReq.getIcon());
         tPermissionEntity.setParentCode(addReq.getParentCode());
         tPermissionEntity.setEnable(addReq.getEnable());
+        tPermissionEntity.setOrder(addReq.getOrder());
         tPermissionDao.insert(tPermissionEntity);
     }
 
@@ -117,6 +119,7 @@ public class PermissionServiceImpl implements PermissionService {
         tPermissionEntity.setIcon(editReq.getIcon());
         tPermissionEntity.setParentCode(editReq.getParentCode());
         tPermissionEntity.setEnable(editReq.getEnable());
+        tPermissionEntity.setOrder(editReq.getOrder());
         tPermissionDao.update(tPermissionEntity, queryWrapper);
 
     }

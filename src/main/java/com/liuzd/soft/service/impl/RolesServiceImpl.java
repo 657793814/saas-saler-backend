@@ -51,7 +51,7 @@ public class RolesServiceImpl implements RolesService {
     final TUserRoleDao tUserRoleDao;
     final TRolePermissionDao tRolePermissionDao;
     final TRoleDao tRoleDao;
-    
+
 
     @LogAnnotation
     public List<TPermissionDto> queryUserMenus(String openid) {
@@ -139,6 +139,7 @@ public class RolesServiceImpl implements RolesService {
             permissionDto.setRoles(roleNames);
 
             //处理父子节点
+            //这里的构建逻辑要求父节点一定在子节点前面便利，如果有其他诉求，这里处理要改写
             List<TPermissionDto> children = new ArrayList<>();
             if (StringUtil.isNotBlank(permissionEntity.getParentCode()) && map.containsKey(permissionEntity.getParentCode())) {
                 children = map.get(permissionEntity.getParentCode()).getChildren();
@@ -189,6 +190,7 @@ public class RolesServiceImpl implements RolesService {
         List<TPermissionEntity> list = new ArrayList<>();
         QueryWrapper<TPermissionEntity> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("enable", 1).in("id", ids);
+        queryWrapper.orderByAsc("parent_code").orderByDesc("`order`");
         return tPermissionDao.selectList(queryWrapper);
     }
 

@@ -35,6 +35,8 @@ public class AddPermissionReq {
     @JsonProperty("parentCode")
     private String parentCode;
 
-
     private Integer enable;
+
+    @JsonProperty("order")
+    private Integer order;
 }

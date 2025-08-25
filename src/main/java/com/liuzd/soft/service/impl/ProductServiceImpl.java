@@ -201,6 +201,7 @@ public class ProductServiceImpl implements ProductService {
         if (!all) {
             queryWrapper.eq("enable", 1);
         }
+        queryWrapper.orderByDesc("id");
         Page<TSpecTypeEntity> resultPage = tSpecTypeDao.selectPage(page, queryWrapper);
         pageResult.setTotal(resultPage.getTotal());
         pageResult.setCurrent((int) resultPage.getCurrent());
@@ -237,6 +238,7 @@ public class ProductServiceImpl implements ProductService {
         queryWrapper.like(StringUtils.isNotBlank(req.getName()), "name", req.getName());
         queryWrapper.like(StringUtils.isNotBlank(req.getCode()), "code", req.getCode());
         queryWrapper.eq(req.getEnable() != null, "enable", req.getEnable());
+        queryWrapper.orderByDesc("id");
         Page<PProductsEntity> resultPage = productsDao.selectPage(page, queryWrapper);
 
         //查询sku
