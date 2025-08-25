@@ -7,10 +7,7 @@ import com.liuzd.soft.vo.product.*;
 import com.liuzd.soft.vo.rets.ResultMessage;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * @author: liuzd
@@ -30,9 +27,9 @@ public class ProductsController {
         return ResultMessage.success(productService.page(req));
     }
 
-    @PostMapping("/detail")
-    public ResultMessage<Object> detail() {
-        return ResultMessage.success("success");
+    @RequestMapping("/detail")
+    public ResultMessage<EditProductResp> detail(@RequestParam(name = "productId", defaultValue = "0") Integer productId) throws JsonProcessingException {
+        return ResultMessage.success(productService.detail(productId));
     }
 
     @PostMapping(path = "/create")
@@ -41,8 +38,9 @@ public class ProductsController {
         return ResultMessage.success("success");
     }
 
-    @PostMapping(path = "/update")
-    public ResultMessage<Object> update(@Valid @RequestBody CreateProductReq createProductReq) throws JsonProcessingException {
+    @PostMapping(path = "/edit")
+    public ResultMessage<Object> edit(@Valid @RequestBody CreateProductReq createProductReq) throws JsonProcessingException {
+        productService.editProduct(createProductReq);
         return ResultMessage.success("success");
     }
 
@@ -52,8 +50,56 @@ public class ProductsController {
     }
 
 
+    /**
+     * 商品创建页面的规格分页数据
+     * 查询的时可见的
+     *
+     * @param req
+     * @return
+     */
     @PostMapping(path = "/spec_data")
     public ResultMessage<PageResult<SpecDataResp>> specData(@RequestBody SpecDataPageReq req) {
         return ResultMessage.success(productService.specData(req));
+    }
+
+    /**
+     * 商品规格分页页面数据
+     *
+     * @param req
+     * @return
+     */
+    @PostMapping(path = "/spec_page")
+    public ResultMessage<PageResult<SpecDataResp>> specPage(@RequestBody SpecDataPageReq req) {
+        return ResultMessage.success(productService.specPage(req));
+    }
+
+    @PostMapping(path = "/create_spec_value")
+    public ResultMessage<Object> createSpecValue(@RequestBody AddSpecValueReq req) {
+        productService.createSpecValue(req);
+        return ResultMessage.success("success");
+    }
+
+    @PostMapping(path = "/update_spec_type_status")
+    public ResultMessage<Object> updateSpecTypeStatus(@RequestBody UpdateSpecTypeReq req) {
+        productService.updateSpecTypeStatus(req);
+        return ResultMessage.success("success");
+    }
+
+    @PostMapping(path = "/update_spec_value_status")
+    public ResultMessage<Object> updateSpecValueStatus(@RequestBody UpdateSpecValueReq req) {
+        productService.updateSpecValueStatus(req);
+        return ResultMessage.success("success");
+    }
+
+    @PostMapping(path = "/update_product_status")
+    public ResultMessage<Object> updateProductStatus(@RequestBody UpdateProductStatusReq req) {
+        productService.updateProductStatus(req);
+        return ResultMessage.success("success");
+    }
+
+    @PostMapping(path = "/update_sku_status")
+    public ResultMessage<Object> updateSkuStatus(@RequestBody UpdateSkuStatusReq req) {
+        productService.updateSkuStatus(req);
+        return ResultMessage.success("success");
     }
 }

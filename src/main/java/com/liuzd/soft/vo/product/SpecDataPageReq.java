@@ -1,5 +1,6 @@
 package com.liuzd.soft.vo.product;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.liuzd.soft.vo.page.PageRequest;
 import lombok.Data;
@@ -13,5 +14,6 @@ import lombok.Data;
 @Data
 @JsonSerialize
 public class SpecDataPageReq extends PageRequest {
+    @JsonProperty(value = "name", defaultValue = "")
     private String name;
 }

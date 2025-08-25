@@ -24,4 +24,7 @@ public class TSpecValueEntity {
 
     @TableField(value = "value")
     private String value;
+
+    @TableField(value = "enable")
+    private Integer enable;
 }

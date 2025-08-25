@@ -7,6 +7,8 @@ import java.math.BigDecimal;
 import java.util.List;
 
 /**
+ * 商品分页响应结构
+ *
  * @author: liuzd
  * @date: 2025/8/24
  * @email: liuzd2025@qq.com
@@ -23,6 +25,6 @@ public class ProductPageResp {
     private BigDecimal salePrice;
     private BigDecimal costPrice;
     private int enable;
-    private List<SkuResp> children;
+    private List<PageSkuResp> children;
 
 }

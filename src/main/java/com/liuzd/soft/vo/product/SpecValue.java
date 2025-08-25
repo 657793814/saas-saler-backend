@@ -14,4 +14,5 @@ import lombok.Data;
 public class SpecValue {
     private Integer specId;
     private String specValue;
+    private Integer enable;
 }

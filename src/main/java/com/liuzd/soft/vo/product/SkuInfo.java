@@ -17,6 +17,10 @@ import java.util.List;
 @JsonSerialize
 public class SkuInfo {
 
+    //编辑商品时有值
+    @JsonProperty(value = "skuId", defaultValue = "0")
+    private Integer skuId;
+
     @JsonProperty(value = "image", defaultValue = "")
     private String image;
 

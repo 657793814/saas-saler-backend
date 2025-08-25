@@ -14,7 +14,23 @@ public interface ProductService {
 
     PageResult<ProductPageResp> page(ProductPageReq req);
 
+    EditProductResp detail(Integer productId) throws JsonProcessingException;
+
     void createProduct(CreateProductReq createProductReq) throws JsonProcessingException;
 
+    void editProduct(CreateProductReq createProductReq) throws JsonProcessingException;
+
     PageResult<SpecDataResp> specData(SpecDataPageReq req);
+
+    PageResult<SpecDataResp> specPage(SpecDataPageReq req);
+
+    void createSpecValue(AddSpecValueReq req);
+
+    void updateSpecTypeStatus(UpdateSpecTypeReq req);
+
+    void updateSpecValueStatus(UpdateSpecValueReq req);
+
+    void updateProductStatus(UpdateProductStatusReq req);
+
+    void updateSkuStatus(UpdateSkuStatusReq req);
 }

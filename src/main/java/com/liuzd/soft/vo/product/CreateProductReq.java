@@ -17,6 +17,7 @@ import java.util.List;
 @JsonSerialize
 public class CreateProductReq {
 
+    //编辑商品时有值
     private Integer id;
 
     @JsonProperty("title")

@@ -17,6 +17,7 @@ public class SpecDataResp {
 
     private Integer specTypeId;
     private String specTypeName;
+    private Integer enable;
     private List<SpecValue> specValues;
 
 }

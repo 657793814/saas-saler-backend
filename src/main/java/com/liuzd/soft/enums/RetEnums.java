@@ -33,6 +33,11 @@ public enum RetEnums {
     ROLE_NOT_EXIST(200011, "角色不存在"),
     PERMISSION_NOT_EXIST(200012, "权限点不存在"),
     NO_PERMISSION(200013, "您没有操作权限"),
+    PRODUCT_NOT_EXIST(200014, "商品不存在"),
+    PRODUCT_EDIT_ERROR(200015, "编辑商品发生异常"),
+    SPEC_TYPE_NOT_EXIST(200016, "规格类型不存在"),
+    SPEC_VALUE_NOT_EXIST(200017, "规格值不存在"),
+    SKU_NOT_EXIST(200018, "sku不存在"),
     ;
     private final Integer code;
     private final String message;
