@@ -410,13 +410,15 @@ public class ProductServiceImpl implements ProductService {
         product.setEnable(req.getEnable());
         productsDao.updateById(product);
 
-        //批量更新商品sku状态
-        /*
-        UpdateWrapper<PItemsEntity> updateWrapper = new UpdateWrapper<>();
-        updateWrapper.eq("product_id", req.getProductId());
-        updateWrapper.set("enable", req.getEnable());
-        itemsDao.update(null, updateWrapper);
-         */
+        //批量更新商品sku状态,下架可以批量，上架不可以
+        if (req.getEnable() == 0) {
+            UpdateWrapper<PItemsEntity> updateWrapper = new UpdateWrapper<>();
+            updateWrapper.eq("product_id", req.getProductId());
+            updateWrapper.set("enable", req.getEnable());
+            itemsDao.update(null, updateWrapper);
+        }
+
+
     }
 
     @Override
