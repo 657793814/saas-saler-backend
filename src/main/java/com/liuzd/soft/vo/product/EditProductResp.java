@@ -30,6 +30,12 @@ public class EditProductResp {
     @JsonProperty("description")
     private String detail;
 
+    @JsonProperty("categoryIds")
+    private List<Integer> categoryIds;
+
+    @JsonProperty("shippingTemplateId")
+    private Integer shippingTemplateId;
+
     @JsonProperty("imageUrls")
     private List<Map<String, String>> imageUrls;
 

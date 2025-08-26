@@ -17,7 +17,7 @@ import java.math.BigDecimal;
  * @desc
  */
 @Data
-@TableName("p_items")
+@TableName("items")
 public class PItemsEntity {
 
     @TableId(value = "`id`", type = IdType.AUTO)
@@ -44,7 +44,7 @@ public class PItemsEntity {
 
     @TableField(value = "`stock`")
     private Integer stock;
-    
+
     @TableField(value = "`enable`")
     private Integer enable;
 

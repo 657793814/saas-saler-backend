@@ -1,8 +1,12 @@
 package com.liuzd.soft.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.liuzd.soft.dto.product.PProductCategoryDto;
+import com.liuzd.soft.dto.shipping.PShippingTemplateDto;
 import com.liuzd.soft.vo.page.PageResult;
 import com.liuzd.soft.vo.product.*;
+
+import java.util.List;
 
 /**
  * @author: liuzd
@@ -33,4 +37,16 @@ public interface ProductService {
     void updateProductStatus(UpdateProductStatusReq req);
 
     void updateSkuStatus(UpdateSkuStatusReq req);
+
+    PageResult<PShippingTemplateDto> shippingTemplatePage(ShippingPageReq req);
+
+    List<PShippingTemplateDto> getShippingTemplateData();
+
+    void createShippingTemplate(CreateShippingTemplateReq req);
+
+    void editShippingTemplate(CreateShippingTemplateReq req);
+
+    void delShippingTemplate(Integer id);
+
+    List<PProductCategoryDto> getProductCategoryData();
 }

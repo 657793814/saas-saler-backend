@@ -15,7 +15,7 @@ import lombok.Data;
  * @desc
  */
 @Data
-@TableName("p_products")
+@TableName("products")
 public class PProductsEntity {
 
     @TableId(value = "`id`", type = IdType.AUTO)
@@ -53,5 +53,20 @@ public class PProductsEntity {
 
     @TableField(value = "`update_user`")
     private String updateUser;
+
+    @TableField(value = "`platform_status`")
+    private Integer platformStatus;
+
+    @TableField(value = "`one_category`")
+    private Integer oneCategory;
+
+    @TableField(value = "`two_category`")
+    private Integer twoCategory;
+
+    @TableField(value = "`three_category`")
+    private Integer threeCategory;
+
+    @TableField(value = "`shipping_template_id`")
+    private Integer shippingTemplateId;
 
 }

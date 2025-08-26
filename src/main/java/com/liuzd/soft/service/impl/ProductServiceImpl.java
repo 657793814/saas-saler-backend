@@ -10,16 +10,13 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.liuzd.soft.consts.GlobalConstant;
+import com.liuzd.soft.consts.ProductConstant;
 import com.liuzd.soft.context.ThreadContextHolder;
-import com.liuzd.soft.dao.ItemsDao;
-import com.liuzd.soft.dao.ProductsDao;
-import com.liuzd.soft.dao.TSpecTypeDao;
-import com.liuzd.soft.dao.TSpecValueDao;
+import com.liuzd.soft.dao.*;
+import com.liuzd.soft.dto.product.PProductCategoryDto;
+import com.liuzd.soft.dto.shipping.PShippingTemplateDto;
 import com.liuzd.soft.dto.token.TokenInfo;
-import com.liuzd.soft.entity.PItemsEntity;
-import com.liuzd.soft.entity.PProductsEntity;
-import com.liuzd.soft.entity.TSpecTypeEntity;
-import com.liuzd.soft.entity.TSpecValueEntity;
+import com.liuzd.soft.entity.*;
 import com.liuzd.soft.enums.RetEnums;
 import com.liuzd.soft.exception.MyException;
 import com.liuzd.soft.service.ProductService;
@@ -27,6 +24,7 @@ import com.liuzd.soft.utils.DateUtils;
 import com.liuzd.soft.utils.IdUtils;
 import com.liuzd.soft.vo.page.PageResult;
 import com.liuzd.soft.vo.product.*;
+import jodd.util.StringUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -36,6 +34,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
+ * saas 商家后台产品逻辑
+ *
  * @author: liuzd
  * @date: 2025/8/24
  * @email: liuzd2025@qq.com
@@ -47,11 +47,13 @@ import java.util.stream.Collectors;
 public class ProductServiceImpl implements ProductService {
 
     final ObjectMapper objectMapper;
-    final ProductsDao productsDao;
-    final ItemsDao itemsDao;
+    final PProductsDao pProductsDao;
+    final PItemsDao pItemsDao;
     final TSpecTypeDao tSpecTypeDao;
     final TSpecValueDao tSpecValueDao;
     final MinioService minioService;
+    final PShippingTemplateDao pShippingTemplateDao;
+    final PProductCategoryDao pProductCategoryDao;
 
 
     @Override
@@ -60,7 +62,8 @@ public class ProductServiceImpl implements ProductService {
         TokenInfo tokenInfo = (TokenInfo) ThreadContextHolder.get(GlobalConstant.LOGIN_USER_INFO);
         PProductsEntity product = new PProductsEntity();
         fillProductInfo(createProductReq, product, tenantCode, tokenInfo);
-        productsDao.insert(product);
+        product.setPlatformStatus(ProductConstant.PRODUCT_PLATFORM_STATUS_AUDIT);
+        pProductsDao.insert(product);
         int productId = product.getId();
         log.info("insert product ,productInfo:{}", product);
 
@@ -72,14 +75,15 @@ public class ProductServiceImpl implements ProductService {
         Assert.notNull(editProductReq.getId(), () -> MyException.exception(RetEnums.PRODUCT_EDIT_ERROR));
         QueryWrapper<PProductsEntity> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("id", editProductReq.getId());
-        PProductsEntity product = productsDao.selectOne(queryWrapper);
+        PProductsEntity product = pProductsDao.selectOne(queryWrapper);
         Assert.notNull(product, () -> MyException.exception(RetEnums.PRODUCT_NOT_EXIST));
 
         String tenantCode = ThreadContextHolder.getTenantCode();
         TokenInfo tokenInfo = (TokenInfo) ThreadContextHolder.get(GlobalConstant.LOGIN_USER_INFO);
 
         fillProductInfo(editProductReq, product, tenantCode, tokenInfo);
-        productsDao.update(product, queryWrapper);
+        product.setPlatformStatus(ProductConstant.PRODUCT_PLATFORM_STATUS_AUDIT);
+        pProductsDao.update(product, queryWrapper);
         log.info("update product ,productInfo:{}", product);
 
         int productId = product.getId();
@@ -96,7 +100,7 @@ public class ProductServiceImpl implements ProductService {
             QueryWrapper<PItemsEntity> itemQueryWrapper = new QueryWrapper<>();
             itemQueryWrapper.eq("id", skuInfo.getSkuId());
             if (isEdit && skuInfo.getSkuId() > 0) {
-                item = itemsDao.selectOne(itemQueryWrapper);
+                item = pItemsDao.selectOne(itemQueryWrapper);
                 //健壮性处理
                 if (Objects.nonNull(item)) {
                     existSku = true;
@@ -158,10 +162,10 @@ public class ProductServiceImpl implements ProductService {
             }
 
             if (existSku) {
-                itemsDao.update(item, itemQueryWrapper);
+                pItemsDao.update(item, itemQueryWrapper);
                 log.info("update sku ,skuInfo:{}", item);
             } else {
-                itemsDao.insert(item);
+                pItemsDao.insert(item);
                 log.info("insert sku ,skuInfo:{}", item);
             }
 
@@ -175,12 +179,29 @@ public class ProductServiceImpl implements ProductService {
         product.setDetail(createProductReq.getDetail());
         product.setDesc(createProductReq.getDesc());
         product.setImgUrls(objectMapper.writeValueAsString(createProductReq.getImageUrls()));
-        product.setEnable(0); //默认不上架
+        product.setEnable(ProductConstant.PRODUCT_STATUS_DISABLE); //默认不上架
         product.setCreateUser(tokenInfo.getUserCode());
         product.setUpdateUser(tokenInfo.getUserCode());
         product.setCreateTime(DateUtils.getCurrentDateTimeString());
         product.setUpdateTime(DateUtils.getCurrentDateTimeString());
+
+        //商家更新会变成审核状态
+        product.setPlatformStatus(ProductConstant.PRODUCT_PLATFORM_STATUS_AUDIT);
+        product.setShippingTemplateId(createProductReq.getShippingTemplateId());
+        product.setThreeCategory(createProductReq.getThreeCategoryId());
+        Map<Integer, Integer> map = categoryMap();
+        Integer twoCate = map.get(createProductReq.getThreeCategoryId());
+        product.setOneCategory(twoCate);
+        Integer oneCate = map.get(twoCate);
+        product.setTwoCategory(oneCate);
+
     }
+
+    private Map<Integer, Integer> categoryMap() {
+        List<PProductCategoryEntity> categoryList = pProductCategoryDao.selectList(new QueryWrapper<>());
+        return categoryList.stream().collect(Collectors.toMap(PProductCategoryEntity::getId, PProductCategoryEntity::getParentId));
+    }
+
 
     @Override
     public PageResult<SpecDataResp> specData(SpecDataPageReq req) {
@@ -235,17 +256,18 @@ public class ProductServiceImpl implements ProductService {
         PageResult<ProductPageResp> pageResult = new PageResult<>();
         Page<PProductsEntity> page = new Page<>(req.getCurrent(), req.getSize());
         QueryWrapper<PProductsEntity> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("tenant_code", ThreadContextHolder.getTenantCode());
         queryWrapper.like(StringUtils.isNotBlank(req.getName()), "name", req.getName());
         queryWrapper.like(StringUtils.isNotBlank(req.getCode()), "code", req.getCode());
         queryWrapper.eq(req.getEnable() != null, "enable", req.getEnable());
         queryWrapper.orderByDesc("id");
-        Page<PProductsEntity> resultPage = productsDao.selectPage(page, queryWrapper);
+        Page<PProductsEntity> resultPage = pProductsDao.selectPage(page, queryWrapper);
 
         //查询sku
         List<Integer> productIds = resultPage.getRecords().stream().map(PProductsEntity::getId).collect(Collectors.toList());
         QueryWrapper<PItemsEntity> queryWrapper1 = new QueryWrapper<>();
         queryWrapper1.in("product_id", productIds);
-        List<PItemsEntity> itemsList = itemsDao.selectList(queryWrapper1);
+        List<PItemsEntity> itemsList = pItemsDao.selectList(queryWrapper1);
         Map<Integer, List<PItemsEntity>> itemsMap = itemsList.stream().collect(Collectors.groupingBy(PItemsEntity::getProductId));
 
         //处理返回
@@ -315,7 +337,8 @@ public class ProductServiceImpl implements ProductService {
     public EditProductResp detail(Integer productId) throws JsonProcessingException {
         QueryWrapper<PProductsEntity> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("id", productId);
-        PProductsEntity product = productsDao.selectOne(queryWrapper);
+        queryWrapper.eq("tenant_code", ThreadContextHolder.getTenantCode());
+        PProductsEntity product = pProductsDao.selectOne(queryWrapper);
         Assert.notNull(product, () -> MyException.exception(RetEnums.PRODUCT_NOT_EXIST));
 
         EditProductResp editProductResp = new EditProductResp();
@@ -323,6 +346,14 @@ public class ProductServiceImpl implements ProductService {
         editProductResp.setName(product.getName());
         editProductResp.setDesc(product.getDesc());
         editProductResp.setDetail(product.getDetail());
+        editProductResp.setShippingTemplateId(product.getShippingTemplateId());
+        editProductResp.setCategoryIds(new ArrayList<Integer>() {
+            {
+                add(product.getOneCategory());
+                add(product.getTwoCategory());
+                add(product.getThreeCategory());
+            }
+        });
 
         //img 处理
         List<String> imageUrls = new ArrayList<>();
@@ -341,7 +372,7 @@ public class ProductServiceImpl implements ProductService {
         editProductResp.setImageUrls(imgs);
 
         //sku处理
-        List<DetailSkuResp> skus = itemsDao.selectList(new QueryWrapper<PItemsEntity>().eq("product_id", productId)).stream().map(sku -> {
+        List<DetailSkuResp> skus = pItemsDao.selectList(new QueryWrapper<PItemsEntity>().eq("product_id", productId)).stream().map(sku -> {
             DetailSkuResp skuInfo = new DetailSkuResp();
             skuInfo.setSkuId(sku.getId());
             skuInfo.setStock(sku.getStock());
@@ -407,17 +438,17 @@ public class ProductServiceImpl implements ProductService {
     public void updateProductStatus(UpdateProductStatusReq req) {
         QueryWrapper<PProductsEntity> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("id", req.getProductId());
-        PProductsEntity product = productsDao.selectOne(queryWrapper);
+        PProductsEntity product = pProductsDao.selectOne(queryWrapper);
         Assert.notNull(product, () -> MyException.exception(RetEnums.PRODUCT_NOT_EXIST));
         product.setEnable(req.getEnable());
-        productsDao.updateById(product);
+        pProductsDao.updateById(product);
 
         //批量更新商品sku状态,下架可以批量，上架不可以
         if (req.getEnable() == 0) {
             UpdateWrapper<PItemsEntity> updateWrapper = new UpdateWrapper<>();
             updateWrapper.eq("product_id", req.getProductId());
             updateWrapper.set("enable", req.getEnable());
-            itemsDao.update(null, updateWrapper);
+            pItemsDao.update(null, updateWrapper);
         }
 
 
@@ -427,17 +458,103 @@ public class ProductServiceImpl implements ProductService {
     public void updateSkuStatus(UpdateSkuStatusReq req) {
         QueryWrapper<PItemsEntity> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("id", req.getSkuId());
-        PItemsEntity sku = itemsDao.selectOne(queryWrapper);
+        PItemsEntity sku = pItemsDao.selectOne(queryWrapper);
         Assert.notNull(sku, () -> MyException.exception(RetEnums.SKU_NOT_EXIST));
         sku.setEnable(req.getEnable());
-        itemsDao.updateById(sku);
+        pItemsDao.updateById(sku);
 
         //如果所有的sku都下架了，则商品也下架
         if (req.getEnable() == 0) {
             UpdateWrapper<PProductsEntity> updateWrapper = new UpdateWrapper<>();
             updateWrapper.eq("id", sku.getProductId());
             updateWrapper.set("enable", req.getEnable());
-            productsDao.update(null, updateWrapper);
+            pProductsDao.update(null, updateWrapper);
         }
+    }
+
+    @Override
+    public PageResult<PShippingTemplateDto> shippingTemplatePage(ShippingPageReq req) {
+        Page<PShippingTemplateEntity> page = new Page<>(req.getCurrent(), req.getSize());
+        page.setCurrent(req.getCurrent());
+        page.setSize(req.getSize());
+        QueryWrapper<PShippingTemplateEntity> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("tenant_code", ThreadContextHolder.getTenantCode());
+        queryWrapper.like(StringUtil.isNotBlank(req.getName()), "template_name", req.getName());
+
+        Page<PShippingTemplateEntity> resultPage = pShippingTemplateDao.selectPage(page, queryWrapper);
+        PageResult<PShippingTemplateDto> pageResult = new PageResult<>();
+        pageResult.setTotal(resultPage.getTotal());
+        pageResult.setCurrent((int) resultPage.getCurrent());
+        pageResult.setSize((int) resultPage.getSize());
+        pageResult.setRecords(resultPage.getRecords().stream().map(PShippingTemplateDto::new).collect(Collectors.toList()));
+        return pageResult;
+    }
+
+    @Override
+    public List<PShippingTemplateDto> getShippingTemplateData() {
+        QueryWrapper<PShippingTemplateEntity> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("status", ProductConstant.SHIPPING_TEMPLATE_STATUS_ENABLE);
+        queryWrapper.eq("tenant_code", ThreadContextHolder.getTenantCode());
+        List<PShippingTemplateEntity> list = pShippingTemplateDao.selectList(queryWrapper);
+        return list.stream().map(PShippingTemplateDto::new).collect(Collectors.toList());
+    }
+
+    @Override
+    public void createShippingTemplate(CreateShippingTemplateReq req) {
+        PShippingTemplateEntity shippingTemplateEntity = new PShippingTemplateEntity();
+        fillShippingTemplateData(shippingTemplateEntity, req);
+        pShippingTemplateDao.insert(shippingTemplateEntity);
+
+    }
+
+    @Override
+    public void editShippingTemplate(CreateShippingTemplateReq req) {
+        QueryWrapper<PShippingTemplateEntity> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("id", req.getId());
+        queryWrapper.eq("tenant_code", ThreadContextHolder.getTenantCode());
+        PShippingTemplateEntity shippingTemplateEntity = pShippingTemplateDao.selectOne(queryWrapper);
+        Assert.notNull(shippingTemplateEntity, () -> MyException.exception(RetEnums.SHIPPING_TEMPLATE_NOT_EXIST));
+        fillShippingTemplateData(shippingTemplateEntity, req);
+        pShippingTemplateDao.updateById(shippingTemplateEntity);
+
+    }
+
+    private void fillShippingTemplateData(PShippingTemplateEntity shippingTemplateEntity, CreateShippingTemplateReq req) {
+
+        if (!ProductConstant.VALUATION_TYPE_MAP.contains(req.getValuationType())) {
+            MyException.exception(RetEnums.VALUATION_TYPE_ERROR);
+        }
+
+        if (!ProductConstant.SHIPPING_TEMPLATE_STATUS_MAP.contains(req.getStatus())) {
+            MyException.exception(RetEnums.SHIPPING_TEMPLATE_STATUS_ERROR);
+        }
+
+        shippingTemplateEntity.setTemplateName(req.getTemplateName());
+        shippingTemplateEntity.setTenantCode(ThreadContextHolder.getTenantCode());
+        shippingTemplateEntity.setValuationType(req.getValuationType());
+        shippingTemplateEntity.setFirstFee(req.getFirstFee());
+        shippingTemplateEntity.setAdditionalFee(req.getAdditionalFee());
+        shippingTemplateEntity.setFreeShippingAmount(req.getFreeShippingAmount());
+        shippingTemplateEntity.setStatus(req.getStatus());
+    }
+
+    @Override
+    public void delShippingTemplate(Integer id) {
+        QueryWrapper<PShippingTemplateEntity> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("id", id);
+        queryWrapper.eq("tenant_code", ThreadContextHolder.getTenantCode());
+        PShippingTemplateEntity shippingTemplateEntity = pShippingTemplateDao.selectOne(queryWrapper);
+        Assert.notNull(shippingTemplateEntity, () -> MyException.exception(RetEnums.SHIPPING_TEMPLATE_NOT_EXIST));
+
+        shippingTemplateEntity.setStatus(ProductConstant.SHIPPING_TEMPLATE_STATUS_DISABLE);
+        pShippingTemplateDao.updateById(shippingTemplateEntity);
+    }
+
+    @Override
+    public List<PProductCategoryDto> getProductCategoryData() {
+        QueryWrapper<PProductCategoryEntity> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("status", ProductConstant.CATEGORY_STATUS_ENABLE);
+        List<PProductCategoryEntity> productCategoryEntities = pProductCategoryDao.selectList(queryWrapper);
+        return productCategoryEntities.stream().map(PProductCategoryDto::new).collect(Collectors.toList());
     }
 }

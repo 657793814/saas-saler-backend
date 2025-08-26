@@ -38,6 +38,9 @@ public enum RetEnums {
     SPEC_TYPE_NOT_EXIST(200016, "规格类型不存在"),
     SPEC_VALUE_NOT_EXIST(200017, "规格值不存在"),
     SKU_NOT_EXIST(200018, "sku不存在"),
+    SHIPPING_TEMPLATE_NOT_EXIST(200019, "运费模板不存在"),
+    VALUATION_TYPE_ERROR(200020, "模板计费类型错误"),
+    SHIPPING_TEMPLATE_STATUS_ERROR(200021, "模板计费状态值错误"),
     ;
     private final Integer code;
     private final String message;

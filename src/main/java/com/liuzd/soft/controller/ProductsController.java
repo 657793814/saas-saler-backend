@@ -1,6 +1,8 @@
 package com.liuzd.soft.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.liuzd.soft.dto.product.PProductCategoryDto;
+import com.liuzd.soft.dto.shipping.PShippingTemplateDto;
 import com.liuzd.soft.service.ProductService;
 import com.liuzd.soft.vo.page.PageResult;
 import com.liuzd.soft.vo.product.*;
@@ -8,6 +10,8 @@ import com.liuzd.soft.vo.rets.ResultMessage;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * @author: liuzd
@@ -102,4 +106,39 @@ public class ProductsController {
         productService.updateSkuStatus(req);
         return ResultMessage.success("success");
     }
+
+    @PostMapping(path = "/shipping_templates_page")
+    public ResultMessage<PageResult<PShippingTemplateDto>> shippingTemplatePage(@RequestBody ShippingPageReq req) {
+        return ResultMessage.success(productService.shippingTemplatePage(req));
+    }
+
+    @RequestMapping(path = "/shipping_template_data")
+    public ResultMessage<List<PShippingTemplateDto>> getShippingTemplateData() {
+        return ResultMessage.success(productService.getShippingTemplateData());
+    }
+
+    @PostMapping(path = "/create_shipping_templates")
+    public ResultMessage<Object> createShippingTemplate(@RequestBody CreateShippingTemplateReq req) {
+        productService.createShippingTemplate(req);
+        return ResultMessage.success("success");
+    }
+
+    @PostMapping(path = "/edit_shipping_templates")
+    public ResultMessage<Object> editShippingTemplate(@RequestBody CreateShippingTemplateReq req) {
+        productService.editShippingTemplate(req);
+        return ResultMessage.success("success");
+    }
+
+    @PostMapping(path = "/del_shipping_templates")
+    public ResultMessage<Object> delShippingTemplate(@RequestParam("id") Integer id) {
+        productService.delShippingTemplate(id);
+        return ResultMessage.success("success");
+    }
+
+    @RequestMapping(path = "/category_data")
+    public ResultMessage<List<PProductCategoryDto>> getProductCategoryData() {
+        return ResultMessage.success(productService.getProductCategoryData());
+    }
+
+
 }

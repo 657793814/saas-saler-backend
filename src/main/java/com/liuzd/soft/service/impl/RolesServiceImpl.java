@@ -115,10 +115,13 @@ public class RolesServiceImpl implements RolesService {
         ConcurrentHashMap<String, TPermissionDto> map = new ConcurrentHashMap<>();
         for (TPermissionEntity permissionEntity : permissionEntities) {
             TPermissionDto permissionDto = new TPermissionDto();
+            permissionDto.setId(permissionEntity.getId());
             permissionDto.setCode(permissionEntity.getCode());
             permissionDto.setName(permissionEntity.getName());
             permissionDto.setPath(permissionEntity.getPath());
             permissionDto.setIcon(permissionEntity.getIcon());
+            permissionDto.setParentCode(permissionEntity.getParentCode());
+            permissionDto.setOrder(permissionEntity.getOrder());
 
             //处理roles
             List<Integer> roleIds = permissionRoleMap.get(permissionEntity.getId());
@@ -156,7 +159,12 @@ public class RolesServiceImpl implements RolesService {
                 map.put(permissionEntity.getCode(), permissionDto);
             }
         }
-        list = map.values().stream().collect(Collectors.toList());
+        //这里要排序一下
+        list = map.values().stream()
+                .sorted((p1, p2) -> {
+                    return Integer.compare(p2.getOrder(), p1.getOrder());
+                })
+                .collect(Collectors.toList());
         return list;
     }
 

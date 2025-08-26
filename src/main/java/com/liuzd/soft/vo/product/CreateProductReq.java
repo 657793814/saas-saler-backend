@@ -28,6 +28,12 @@ public class CreateProductReq {
     @NotBlank(message = "简介不能为空")
     private String desc;
 
+    @JsonProperty("categoryId")
+    private Integer threeCategoryId;
+
+    @JsonProperty("shippingTemplateId")
+    private Integer shippingTemplateId;
+
     @JsonProperty("description")
     private String detail;
 
