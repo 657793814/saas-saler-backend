@@ -83,6 +83,18 @@ public class ProductsController {
         return ResultMessage.success("success");
     }
 
+    @PostMapping(path = "/batch_add_spec")
+    public ResultMessage<Object> batchAddSpec(@RequestBody BatchSaveSpecReq req) {
+        productService.batchAddSpec(req);
+        return ResultMessage.success("success");
+    }
+
+    @PostMapping(path = "/batch_add_spec_value")
+    public ResultMessage<Object> batchAddSpecValue(@RequestBody BatchSaveSpecReq req) {
+        productService.batchAddSpecValue(req);
+        return ResultMessage.success("success");
+    }
+
     @PostMapping(path = "/update_spec_type_status")
     public ResultMessage<Object> updateSpecTypeStatus(@RequestBody UpdateSpecTypeReq req) {
         productService.updateSpecTypeStatus(req);

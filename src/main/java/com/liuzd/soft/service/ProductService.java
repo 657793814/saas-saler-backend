@@ -30,6 +30,10 @@ public interface ProductService {
 
     void createSpecValue(AddSpecValueReq req);
 
+    void batchAddSpec(BatchSaveSpecReq req);
+
+    void batchAddSpecValue(BatchSaveSpecReq req);
+
     void updateSpecTypeStatus(UpdateSpecTypeReq req);
 
     void updateSpecValueStatus(UpdateSpecValueReq req);

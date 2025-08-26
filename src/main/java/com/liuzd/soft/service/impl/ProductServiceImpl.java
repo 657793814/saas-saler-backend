@@ -415,6 +415,47 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    public void batchAddSpec(BatchSaveSpecReq req) {
+        Assert.notNull(req.getSpecTypeName(), () -> MyException.exception(RetEnums.SPEC_TYPE_NOT_EXIST, "规格类型名必传"));
+        QueryWrapper<TSpecTypeEntity> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("name", req.getSpecTypeName());
+        TSpecTypeEntity specTypeEntity = tSpecTypeDao.selectOne(queryWrapper);
+        if (Objects.isNull(specTypeEntity)) {
+            specTypeEntity = new TSpecTypeEntity();
+            specTypeEntity.setName(req.getSpecTypeName());
+            specTypeEntity.setEnable(ProductConstant.SPEC_TYPE_ENABLE);
+            tSpecTypeDao.insert(specTypeEntity);
+        }
+        batchCreateSpecValue(req, specTypeEntity.getId());
+    }
+
+    @Override
+    public void batchAddSpecValue(BatchSaveSpecReq req) {
+        Assert.notNull(req.getSpecTypeId(), () -> MyException.exception(RetEnums.SPEC_TYPE_NOT_EXIST, "规格类型id必传"));
+        Integer specTypeId = req.getSpecTypeId();
+        batchCreateSpecValue(req, specTypeId);
+    }
+
+    private void batchCreateSpecValue(BatchSaveSpecReq req, Integer specTypeId) {
+        req.getSpecValues().forEach(item -> {
+            String value = item.get("specValue");
+            Assert.notBlank(value, () -> MyException.exception(RetEnums.SPEC_VALUE_NOT_EXIST, "规格值必传"));
+
+            // 判断规格值是否存在
+            QueryWrapper<TSpecValueEntity> queryWrapper = new QueryWrapper<>();
+            queryWrapper.eq("spec_type_id", specTypeId);
+            queryWrapper.eq("value", value);
+            if (Objects.isNull(tSpecValueDao.selectOne(queryWrapper))) {
+                TSpecValueEntity specValueEntity = new TSpecValueEntity();
+                specValueEntity.setSpecTypeId(specTypeId);
+                specValueEntity.setValue(value);
+                specValueEntity.setEnable(1);
+                tSpecValueDao.insert(specValueEntity);
+            }
+        });
+    }
+
+    @Override
     public void updateSpecTypeStatus(UpdateSpecTypeReq req) {
         QueryWrapper<TSpecTypeEntity> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("id", req.getSpecTypeId());
