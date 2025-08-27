@@ -101,6 +101,13 @@ spring:
     template:
       mandatory: true
 
+  # Elasticsearch配置
+  elasticsearch:
+    enabled: true
+    uris: http://localhost:9200
+    username:
+    password:
+
 # MinIO配置
 minio:
   endpoint: http://localhost:9010

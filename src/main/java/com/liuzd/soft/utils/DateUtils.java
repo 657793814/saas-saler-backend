@@ -1,10 +1,12 @@
 package com.liuzd.soft.utils;
 
-import java.sql.Date;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.Date;
 
 /**
  * @author: liuzd
@@ -13,6 +15,28 @@ import java.time.format.DateTimeFormatter;
  * @desc
  */
 public class DateUtils {
+    private static final String DEFAULT_PATTERN = "yyyy-MM-dd HH:mm:ss";
+
+    public static Date parseDate(String dateStr) {
+        if (dateStr == null || dateStr.isEmpty()) {
+            return null;
+        }
+
+        SimpleDateFormat sdf = new SimpleDateFormat(DEFAULT_PATTERN);
+        try {
+            return sdf.parse(dateStr);
+        } catch (ParseException e) {
+            return null;
+        }
+    }
+
+    public static String formatDate(Date date) {
+        if (date == null) {
+            return null;
+        }
+        SimpleDateFormat sdf = new SimpleDateFormat(DEFAULT_PATTERN);
+        return sdf.format(date);
+    }
 
     public static Date getCurrentDate() {
         return new Date(System.currentTimeMillis());
@@ -25,7 +49,7 @@ public class DateUtils {
      */
     public static String getCurrentDateTimeString() {
         LocalDateTime now = LocalDateTime.now();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DEFAULT_PATTERN);
         return now.format(formatter);
     }
 
@@ -51,25 +75,9 @@ public class DateUtils {
                 Instant.ofEpochMilli(timestamp),
                 ZoneId.systemDefault()
         );
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DEFAULT_PATTERN);
         return dateTime.format(formatter);
     }
-
-    /**
-     * 将Date对象格式化为字符串 (yyyy-MM-dd)
-     *
-     * @param date
-     * @return
-     */
-    public static String formatDateString(Date date) {
-        return date.toString(); // java.sql.Date的toString()方法已经返回yyyy-MM-dd格式
-    }
-
-    public static void main(String[] args) {
-        System.out.println(getCurrentDate());
-        System.out.println(getCurrentDateTimeString());
-        System.out.println(formatDateString(System.currentTimeMillis()));
-        System.out.println(formatDateTimeString(System.currentTimeMillis()));
-    }
+    
 }
 

@@ -1,12 +1,12 @@
 package com.liuzd.soft;
 
 import com.liuzd.soft.config.DynamicDataSource;
+import com.liuzd.soft.dao.PUserToTenantDao;
+import com.liuzd.soft.dao.PUsersDao;
 import com.liuzd.soft.dao.TUserDao;
-import com.liuzd.soft.dao.UserToTenantDao;
-import com.liuzd.soft.dao.UsersDao;
+import com.liuzd.soft.entity.PUserToTenantEntity;
+import com.liuzd.soft.entity.PUsersEntity;
 import com.liuzd.soft.entity.TUserEntity;
-import com.liuzd.soft.entity.UserToTenantEntity;
-import com.liuzd.soft.entity.UsersEntity;
 import com.liuzd.soft.service.impl.RolesServiceImpl;
 import com.liuzd.soft.utils.IdUtils;
 import com.liuzd.soft.utils.TokenUtils;
@@ -24,20 +24,20 @@ class SpringBootTestApplicationTests {
     @Autowired
     private TUserDao tUserDao;
     @Autowired
-    private UsersDao usersDao;
+    private PUsersDao PUsersDao;
     @Autowired
-    private UserToTenantDao userToTenantDao;
+    private PUserToTenantDao PUserToTenantDao;
     @Autowired
     private DynamicDataSource dynamicDataSource;
 
     @Autowired
     private RolesServiceImpl rolesServiceImpl;
-    
+
     void contextLoads() {
         String userCode, username, mobile, openid, unionId, pwd, salt;
 
-        UserToTenantEntity userToTenantEntity = new UserToTenantEntity();
-        UsersEntity usersEntity = new UsersEntity();
+        PUserToTenantEntity PUserToTenantEntity = new PUserToTenantEntity();
+        PUsersEntity PUsersEntity = new PUsersEntity();
         String tenantId = "lzd1234567890";
         int len = 100;
         List<TUserEntity> list = new ArrayList<>(len);
@@ -62,20 +62,20 @@ class SpringBootTestApplicationTests {
             tUserEntity.setSalt(salt);
             list.add(tUserEntity);
 
-            userToTenantEntity.setUnionId(unionId);
-            userToTenantEntity.setOpenId(openid);
-            userToTenantEntity.setTenantId(tenantId);
-            userToTenantEntity.setEnable(1);
-            userToTenantDao.insert(userToTenantEntity);
+            PUserToTenantEntity.setUnionId(unionId);
+            PUserToTenantEntity.setOpenId(openid);
+            PUserToTenantEntity.setTenantId(tenantId);
+            PUserToTenantEntity.setEnable(1);
+            PUserToTenantDao.insert(PUserToTenantEntity);
 
-            usersEntity.setEnable(1);
-            usersEntity.setUserName(username);
-            usersEntity.setPassword(pwd);
-            usersEntity.setMobile(mobile);
-            usersEntity.setUnionId(unionId);
-            usersEntity.setUserCode(userCode);
-            usersEntity.setSalt(salt);
-            usersDao.insert(usersEntity);
+            PUsersEntity.setEnable(1);
+            PUsersEntity.setUserName(username);
+            PUsersEntity.setPassword(pwd);
+            PUsersEntity.setMobile(mobile);
+            PUsersEntity.setUnionId(unionId);
+            PUsersEntity.setUserCode(userCode);
+            PUsersEntity.setSalt(salt);
+            PUsersDao.insert(PUsersEntity);
         }
 
         dynamicDataSource.switchTenant("liuzd");

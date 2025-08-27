@@ -44,8 +44,8 @@ import java.util.Objects;
 public class UserServiceImpl extends ServiceImpl<TUserDao, TUserEntity> implements UserService {
 
     final TUserDao tUserDao;
-    final UserToTenantDao userToTenantDao;
-    final UsersDao usersDao;
+    final PUserToTenantDao PUserToTenantDao;
+    final PUsersDao pUsersDao;
     final TenantsDao tenantsDao;
     final TUserRoleDao tUserRoleDao;
     final UserMQProducerService userMQProducerService;
@@ -100,23 +100,23 @@ public class UserServiceImpl extends ServiceImpl<TUserDao, TUserEntity> implemen
         tUserEntity.setEnable(addUserReq.getEnable() ? 1 : 0);
         tUserDao.insert(tUserEntity);
 
-        UserToTenantEntity userToTenantEntity = new UserToTenantEntity();
+        PUserToTenantEntity PUserToTenantEntity = new PUserToTenantEntity();
         String unionId = IdUtils.generateUnionId();
-        userToTenantEntity.setUnionId(unionId);
-        userToTenantEntity.setOpenId(openid);
-        userToTenantEntity.setTenantId(tenantsEntity.getTenantId());
-        userToTenantEntity.setEnable(1);
-        userToTenantDao.insert(userToTenantEntity);
+        PUserToTenantEntity.setUnionId(unionId);
+        PUserToTenantEntity.setOpenId(openid);
+        PUserToTenantEntity.setTenantId(tenantsEntity.getTenantId());
+        PUserToTenantEntity.setEnable(1);
+        PUserToTenantDao.insert(PUserToTenantEntity);
 
-        UsersEntity usersEntity = new UsersEntity();
-        usersEntity.setEnable(1);
-        usersEntity.setUserName(addUserReq.getUserName());
-        usersEntity.setPassword(pwd);
-        usersEntity.setMobile(addUserReq.getMobile());
-        usersEntity.setUnionId(unionId);
-        usersEntity.setUserCode(addUserReq.getUserCode());
-        usersEntity.setSalt(salt);
-        usersDao.insert(usersEntity);
+        PUsersEntity PUsersEntity = new PUsersEntity();
+        PUsersEntity.setEnable(1);
+        PUsersEntity.setUserName(addUserReq.getUserName());
+        PUsersEntity.setPassword(pwd);
+        PUsersEntity.setMobile(addUserReq.getMobile());
+        PUsersEntity.setUnionId(unionId);
+        PUsersEntity.setUserCode(addUserReq.getUserCode());
+        PUsersEntity.setSalt(salt);
+        pUsersDao.insert(PUsersEntity);
     }
 
     @LogAnnotation

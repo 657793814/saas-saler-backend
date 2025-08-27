@@ -9,6 +9,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.liuzd.soft.config.ProjectProperties;
 import com.liuzd.soft.consts.GlobalConstant;
 import com.liuzd.soft.consts.ProductConstant;
 import com.liuzd.soft.context.ThreadContextHolder;
@@ -20,6 +21,7 @@ import com.liuzd.soft.entity.*;
 import com.liuzd.soft.enums.RetEnums;
 import com.liuzd.soft.exception.MyException;
 import com.liuzd.soft.service.ProductService;
+import com.liuzd.soft.service.es.ProductSearchService;
 import com.liuzd.soft.utils.DateUtils;
 import com.liuzd.soft.utils.IdUtils;
 import com.liuzd.soft.vo.page.PageResult;
@@ -46,6 +48,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ProductServiceImpl implements ProductService {
 
+
     final ObjectMapper objectMapper;
     final PProductsDao pProductsDao;
     final PItemsDao pItemsDao;
@@ -54,6 +57,8 @@ public class ProductServiceImpl implements ProductService {
     final MinioService minioService;
     final PShippingTemplateDao pShippingTemplateDao;
     final PProductCategoryDao pProductCategoryDao;
+    final ProductSearchService productSearchService;
+    final ProjectProperties projectProperties;
 
 
     @Override
@@ -66,6 +71,11 @@ public class ProductServiceImpl implements ProductService {
         pProductsDao.insert(product);
         int productId = product.getId();
         log.info("insert product ,productInfo:{}", product);
+
+        // 同步到Elasticsearch
+        if (projectProperties.isEsEnabled()) {
+            productSearchService.saveProductToES(product);
+        }
 
         handleProductSku(createProductReq, productId, false);
     }
@@ -86,6 +96,10 @@ public class ProductServiceImpl implements ProductService {
         pProductsDao.update(product, queryWrapper);
         log.info("update product ,productInfo:{}", product);
 
+        // 同步到Elasticsearch
+        if (projectProperties.isEsEnabled()) {
+            productSearchService.saveProductToES(product);
+        }
         int productId = product.getId();
         handleProductSku(editProductReq, productId, true);
 
@@ -254,14 +268,20 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public PageResult<ProductPageResp> page(ProductPageReq req) {
         PageResult<ProductPageResp> pageResult = new PageResult<>();
-        Page<PProductsEntity> page = new Page<>(req.getCurrent(), req.getSize());
-        QueryWrapper<PProductsEntity> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("tenant_code", ThreadContextHolder.getTenantCode());
-        queryWrapper.like(StringUtils.isNotBlank(req.getName()), "name", req.getName());
-        queryWrapper.like(StringUtils.isNotBlank(req.getCode()), "code", req.getCode());
-        queryWrapper.eq(req.getEnable() != null, "enable", req.getEnable());
-        queryWrapper.orderByDesc("id");
-        Page<PProductsEntity> resultPage = pProductsDao.selectPage(page, queryWrapper);
+
+
+        Page<PProductsEntity> resultPage = new Page<>(req.getCurrent(), req.getSize());
+        if (projectProperties.isEsEnabled()) {
+            resultPage = productSearchService.searchProductsPage(req);
+        } else {
+            QueryWrapper<PProductsEntity> queryWrapper = new QueryWrapper<>();
+            queryWrapper.eq("tenant_code", ThreadContextHolder.getTenantCode());
+            queryWrapper.like(StringUtils.isNotBlank(req.getName()), "name", req.getName());
+            queryWrapper.like(StringUtils.isNotBlank(req.getCode()), "code", req.getCode());
+            queryWrapper.eq(req.getEnable() != null, "enable", req.getEnable());
+            queryWrapper.orderByDesc("id");
+            resultPage = pProductsDao.selectPage(resultPage, queryWrapper);
+        }
 
         //查询sku
         List<Integer> productIds = resultPage.getRecords().stream().map(PProductsEntity::getId).collect(Collectors.toList());

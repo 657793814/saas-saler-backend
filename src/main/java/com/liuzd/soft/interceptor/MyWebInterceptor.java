@@ -49,7 +49,8 @@ public class MyWebInterceptor implements HandlerInterceptor {
     private static final Set<String> DEFAULT_NO_TENANT_CODE_URI_PREFIXES = ImmutableSet.of(
             "/swagger",
             "/actuator",
-            "/test"
+            "/test",
+            "/api/search"
     );
 
     // 无需token的接口前缀

@@ -5,15 +5,15 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.liuzd.soft.config.DynamicDataSource;
 import com.liuzd.soft.consts.GlobalConstant;
 import com.liuzd.soft.context.ThreadContextHolder;
+import com.liuzd.soft.dao.PUserToTenantDao;
 import com.liuzd.soft.dao.TUserDao;
 import com.liuzd.soft.dao.TenantsDao;
-import com.liuzd.soft.dao.UserToTenantDao;
 import com.liuzd.soft.dto.token.RefreshTokenInfo;
 import com.liuzd.soft.dto.token.TokenInfo;
 import com.liuzd.soft.dto.token.UserTokenInfo;
+import com.liuzd.soft.entity.PUserToTenantEntity;
 import com.liuzd.soft.entity.TUserEntity;
 import com.liuzd.soft.entity.TenantsEntity;
-import com.liuzd.soft.entity.UserToTenantEntity;
 import com.liuzd.soft.enums.LoginTypeEnum;
 import com.liuzd.soft.enums.RetEnums;
 import com.liuzd.soft.exception.MyException;
@@ -21,8 +21,8 @@ import com.liuzd.soft.service.LoginService;
 import com.liuzd.soft.utils.SecureMd5Utils;
 import com.liuzd.soft.utils.TokenUtils;
 import com.liuzd.soft.vo.login.*;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
@@ -38,26 +38,14 @@ import java.util.concurrent.TimeUnit;
  */
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class LoginServiceImpl implements LoginService {
 
     private final RedisTemplate redisTemplate;
     private final DynamicDataSource dynamicDataSource;
     private final TUserDao tUserDao;
-    private final UserToTenantDao userToTenantDao;
+    private final PUserToTenantDao pUserToTenantDao;
     private final TenantsDao tenantsDao;
-
-    @Autowired
-    public LoginServiceImpl(RedisTemplate redisTemplate,
-                            DynamicDataSource dynamicDataSource,
-                            TUserDao tUserDao,
-                            UserToTenantDao userToTenantDao,
-                            TenantsDao tenantsDao) {
-        this.redisTemplate = redisTemplate;
-        this.dynamicDataSource = dynamicDataSource;
-        this.tUserDao = tUserDao;
-        this.userToTenantDao = userToTenantDao;
-        this.tenantsDao = tenantsDao;
-    }
 
     @Override
     public LoginResp<LoginUserRet> doLogin(LoginReq loginReq) {
@@ -88,13 +76,13 @@ public class LoginServiceImpl implements LoginService {
             }
         }
 
-        UserToTenantEntity userToTenantEntity = checkAndGetUserInfo(tUserEntity);
+        PUserToTenantEntity PUserToTenantEntity = checkAndGetUserInfo(tUserEntity);
 
         //3. 生成token等并存储到redis中
         String token = TokenUtils.generateToken();
         String refreshToken = TokenUtils.generateRefreshToken();
         LoginResp<LoginUserRet> loginResp = genToken(refreshToken, ThreadContextHolder.getTenantCode(), tUserEntity.getOpenid(), token, tUserEntity);
-        return getLoginUserRetLoginResp(tUserEntity, userToTenantEntity, loginResp);
+        return getLoginUserRetLoginResp(tUserEntity, PUserToTenantEntity, loginResp);
     }
 
     @Override
@@ -133,7 +121,7 @@ public class LoginServiceImpl implements LoginService {
             throw MyException.exception(RetEnums.USER_NOT_EXIST);
         }
 
-        UserToTenantEntity userToTenantEntity = checkAndGetUserInfo(tUserEntity);
+        PUserToTenantEntity PUserToTenantEntity = checkAndGetUserInfo(tUserEntity);
 
         String oldToken = refreshTokenInfo.getToken();
         delToken(oldToken);
@@ -142,33 +130,33 @@ public class LoginServiceImpl implements LoginService {
         String newToken = TokenUtils.generateToken();
         LoginResp<LoginUserRet> loginResp = genToken(refreshToken, refreshTokenInfo.getTenantCode(), refreshTokenInfo.getOpenid(), newToken, tUserEntity);
 
-        return getLoginUserRetLoginResp(tUserEntity, userToTenantEntity, loginResp);
+        return getLoginUserRetLoginResp(tUserEntity, PUserToTenantEntity, loginResp);
     }
 
-    private LoginResp<LoginUserRet> getLoginUserRetLoginResp(TUserEntity tUserEntity, UserToTenantEntity userToTenantEntity, LoginResp<LoginUserRet> loginResp) {
+    private LoginResp<LoginUserRet> getLoginUserRetLoginResp(TUserEntity tUserEntity, PUserToTenantEntity PUserToTenantEntity, LoginResp<LoginUserRet> loginResp) {
         LoginUserRet loginUserRet = new LoginUserRet();
         loginUserRet.setMobile(tUserEntity.getMobile());
         loginUserRet.setOpenid(tUserEntity.getOpenid());
         loginUserRet.setUserCode(tUserEntity.getUserCode());
         loginUserRet.setUname(tUserEntity.getUserName());
         loginUserRet.setEnable(tUserEntity.getEnable());
-        loginUserRet.setUnionId(userToTenantEntity.getUnionId());
+        loginUserRet.setUnionId(PUserToTenantEntity.getUnionId());
         loginUserRet.setTenantCode(ThreadContextHolder.getTenantCode());
         loginResp.setUserInfo(loginUserRet);
         return loginResp;
     }
 
-    private UserToTenantEntity checkAndGetUserInfo(TUserEntity tUserEntity) {
+    private PUserToTenantEntity checkAndGetUserInfo(TUserEntity tUserEntity) {
         TenantsEntity tenantsEntity = tenantsDao.selectOne(new QueryWrapper<TenantsEntity>().eq("tenant_code", ThreadContextHolder.getTenantCode()));
         if (Objects.isNull(tenantsEntity) || tenantsEntity.getIsEnable() == 0) {
             throw MyException.exception(RetEnums.USERNAME_OR_PWD_ERROR, "租户不存在");
         }
 
-        UserToTenantEntity userToTenantEntity = userToTenantDao.selectOne(new QueryWrapper<UserToTenantEntity>().eq("openid", tUserEntity.getOpenid()).eq("tenant_id", tenantsEntity.getTenantId()));
-        if (Objects.isNull(userToTenantEntity) || userToTenantEntity.getEnable() == 0) {
+        PUserToTenantEntity PUserToTenantEntity = pUserToTenantDao.selectOne(new QueryWrapper<PUserToTenantEntity>().eq("openid", tUserEntity.getOpenid()).eq("tenant_id", tenantsEntity.getTenantId()));
+        if (Objects.isNull(PUserToTenantEntity) || PUserToTenantEntity.getEnable() == 0) {
             throw MyException.exception(RetEnums.USER_NOT_EXIST, "用户不存在");
         }
-        return userToTenantEntity;
+        return PUserToTenantEntity;
     }
 
     public LoginResp<LoginUserRet> genToken(String refreshToken, String tenantCode, String openid, String token, TUserEntity tUserEntity) {
