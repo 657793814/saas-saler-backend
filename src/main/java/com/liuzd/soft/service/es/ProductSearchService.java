@@ -1,6 +1,7 @@
 package com.liuzd.soft.service.es;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
+import co.elastic.clients.elasticsearch._types.SortOrder;
 import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 import co.elastic.clients.elasticsearch.core.SearchRequest;
@@ -193,6 +194,12 @@ public class ProductSearchService {
                     .query(query)
                     .from(from)
                     .size(req.getSize())
+                    .sort(sort -> sort
+                            .field(f -> f
+                                    .field("id")
+                                    .order(SortOrder.Desc)
+                            )
+                    )
             );
 
             // 执行搜索
