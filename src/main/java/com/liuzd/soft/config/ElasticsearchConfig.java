@@ -21,7 +21,7 @@ import org.springframework.data.elasticsearch.repository.config.EnableElasticsea
  * Elasticsearch配置类
  */
 @Configuration
-@EnableElasticsearchRepositories(basePackages = "com.liuzd.soft.repository",
+@EnableElasticsearchRepositories(basePackages = "com.liuzd.soft.dao.repository",
         considerNestedRepositories = true)
 @ConditionalOnProperty(name = "spring.elasticsearch.enabled", havingValue = "true")
 public class ElasticsearchConfig {
@@ -50,7 +50,7 @@ public class ElasticsearchConfig {
 
         HttpHost host = HttpHost.create(elasticsearchUri);
         RestClientBuilder builder = RestClient.builder(host);
-        
+
         // 配置请求超时时间
         builder.setRequestConfigCallback(requestConfigBuilder -> {
             requestConfigBuilder.setConnectTimeout(5000); // 连接超时5秒

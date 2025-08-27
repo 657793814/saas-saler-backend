@@ -1,4 +1,4 @@
-package com.liuzd.soft.repository;
+package com.liuzd.soft.dao.repository;
 
 import com.liuzd.soft.entity.es.ProductSearchEntity;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
