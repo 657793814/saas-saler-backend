@@ -57,7 +57,7 @@ public class ProductServiceImpl implements ProductService {
     final MinioService minioService;
     final PShippingTemplateDao pShippingTemplateDao;
     final PProductCategoryDao pProductCategoryDao;
-    final ProductSearchService productSearchService;
+    final Optional<ProductSearchService> productSearchService;
     final ProjectProperties projectProperties;
 
 
@@ -67,14 +67,16 @@ public class ProductServiceImpl implements ProductService {
         TokenInfo tokenInfo = (TokenInfo) ThreadContextHolder.get(GlobalConstant.LOGIN_USER_INFO);
         PProductsEntity product = new PProductsEntity();
         fillProductInfo(createProductReq, product, tenantCode, tokenInfo);
-        product.setPlatformStatus(ProductConstant.PRODUCT_PLATFORM_STATUS_AUDIT);
+        product.setEnable(ProductConstant.PRODUCT_STATUS_ENABLE);
+        product.setCreateUser(tokenInfo.getUserCode());
+        product.setCreateTime(DateUtils.getCurrentDateTimeString());
         pProductsDao.insert(product);
         int productId = product.getId();
         log.info("insert product ,productInfo:{}", product);
 
         // 同步到Elasticsearch
         if (projectProperties.isEsEnabled()) {
-            productSearchService.saveProductToES(product);
+            productSearchService.get().saveProductToES(product);
         }
 
         handleProductSku(createProductReq, productId, false);
@@ -92,13 +94,12 @@ public class ProductServiceImpl implements ProductService {
         TokenInfo tokenInfo = (TokenInfo) ThreadContextHolder.get(GlobalConstant.LOGIN_USER_INFO);
 
         fillProductInfo(editProductReq, product, tenantCode, tokenInfo);
-        product.setPlatformStatus(ProductConstant.PRODUCT_PLATFORM_STATUS_AUDIT);
         pProductsDao.update(product, queryWrapper);
         log.info("update product ,productInfo:{}", product);
 
         // 同步到Elasticsearch
         if (projectProperties.isEsEnabled()) {
-            productSearchService.saveProductToES(product);
+            productSearchService.get().saveProductToES(product);
         }
         int productId = product.getId();
         handleProductSku(editProductReq, productId, true);
@@ -117,20 +118,27 @@ public class ProductServiceImpl implements ProductService {
                 item = pItemsDao.selectOne(itemQueryWrapper);
                 //健壮性处理
                 if (Objects.nonNull(item)) {
-                    existSku = true;
+                    if (item.getProductId() != productId) {  //正常 productId 是匹配的，不匹配就是异常提交
+                        existSku = false;
+                    } else {
+                        existSku = true;
+                    }
                 } else {
                     existSku = false;
-                    item = new PItemsEntity();
                 }
             }
 
-            item.setProductId(productId);
-            item.setCode(IdUtils.generateSkuCode());
+            if (!existSku) {
+                item = new PItemsEntity();
+                item.setProductId(productId);
+                item.setCode(IdUtils.generateSkuCode());
+                item.setEnable(ProductConstant.SKU_STATUS_ENABLE);  //默认启用
+            }
+
             item.setImg(skuInfo.getImage());
             item.setStock(skuInfo.getStock());
             item.setSalePrice(skuInfo.getSalePrice());
             item.setCostPrice(skuInfo.getCostPrice());
-            item.setEnable(0);
 
             //处理规格数据,单规格没有这个数据
             List<SpecInfo> specList = skuInfo.getSpecList();
@@ -193,10 +201,7 @@ public class ProductServiceImpl implements ProductService {
         product.setDetail(createProductReq.getDetail());
         product.setDesc(createProductReq.getDesc());
         product.setImgUrls(objectMapper.writeValueAsString(createProductReq.getImageUrls()));
-        product.setEnable(ProductConstant.PRODUCT_STATUS_DISABLE); //默认不上架
-        product.setCreateUser(tokenInfo.getUserCode());
         product.setUpdateUser(tokenInfo.getUserCode());
-        product.setCreateTime(DateUtils.getCurrentDateTimeString());
         product.setUpdateTime(DateUtils.getCurrentDateTimeString());
 
         //商家更新会变成审核状态
@@ -272,7 +277,7 @@ public class ProductServiceImpl implements ProductService {
 
         Page<PProductsEntity> resultPage = new Page<>(req.getCurrent(), req.getSize());
         if (projectProperties.isEsEnabled()) {
-            resultPage = productSearchService.searchProductsPage(req);
+            resultPage = productSearchService.get().searchProductsPage(req);
         } else {
             QueryWrapper<PProductsEntity> queryWrapper = new QueryWrapper<>();
             queryWrapper.eq("tenant_code", ThreadContextHolder.getTenantCode());
@@ -504,6 +509,11 @@ public class ProductServiceImpl implements ProductService {
         product.setEnable(req.getEnable());
         pProductsDao.updateById(product);
 
+        // 同步到Elasticsearch
+        if (projectProperties.isEsEnabled()) {
+            productSearchService.get().saveProductToES(product);
+        }
+
         //批量更新商品sku状态,下架可以批量，上架不可以
         if (req.getEnable() == 0) {
             UpdateWrapper<PItemsEntity> updateWrapper = new UpdateWrapper<>();
@@ -525,11 +535,18 @@ public class ProductServiceImpl implements ProductService {
         pItemsDao.updateById(sku);
 
         //如果所有的sku都下架了，则商品也下架
-        if (req.getEnable() == 0) {
+        if (req.getEnable() == ProductConstant.SKU_STATUS_DISABLE) {
             UpdateWrapper<PProductsEntity> updateWrapper = new UpdateWrapper<>();
             updateWrapper.eq("id", sku.getProductId());
-            updateWrapper.set("enable", req.getEnable());
+            updateWrapper.set("enable", ProductConstant.PRODUCT_STATUS_DISABLE);
             pProductsDao.update(null, updateWrapper);
+
+            // 同步到Elasticsearch
+            if (projectProperties.isEsEnabled()) {
+                PProductsEntity product = pProductsDao.selectById(sku.getProductId());
+                productSearchService.get().saveProductToES(product);
+            }
+
         }
     }
 

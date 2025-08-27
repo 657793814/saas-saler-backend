@@ -48,8 +48,9 @@ public class ElasticsearchConfig {
     @Bean
     public RestClient getRestClient() {
 
-        RestClientBuilder builder = RestClient.builder(HttpHost.create(elasticsearchUri));
-
+        HttpHost host = HttpHost.create(elasticsearchUri);
+        RestClientBuilder builder = RestClient.builder(host);
+        
         // 配置请求超时时间
         builder.setRequestConfigCallback(requestConfigBuilder -> {
             requestConfigBuilder.setConnectTimeout(5000); // 连接超时5秒

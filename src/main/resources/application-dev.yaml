@@ -103,7 +103,7 @@ spring:
 
   # Elasticsearch配置
   elasticsearch:
-    enabled: true
+    enabled: false
     uris: http://localhost:9200
     username:
     password:

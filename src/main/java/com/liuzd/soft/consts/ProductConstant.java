@@ -7,6 +7,10 @@ public class ProductConstant {
 
     public final static Integer PRODUCT_STATUS_DISABLE = 0;
     public final static Integer PRODUCT_STATUS_ENABLE = 1;
+
+    public final static Integer SKU_STATUS_DISABLE = 0;
+    public final static Integer SKU_STATUS_ENABLE = 1;
+
     public final static Integer PRODUCT_PLATFORM_STATUS_AUDIT = 0;  //待审核
     public final static Integer PRODUCT_PLATFORM_STATUS_OFF = 1;  //下架
     public final static Integer PRODUCT_PLATFORM_STATUS_NORMAL = 2;  //上架
