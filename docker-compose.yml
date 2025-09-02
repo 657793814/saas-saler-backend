@@ -17,7 +17,7 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=dev
       - JAVA_OPTS=-Xmx512m -Xms256m
-    command: [ "sh", "-c", "java $${JAVA_OPTS} -Dfile.encoding=UTF-8 -Dserver.port=$${SERVER_PORT} -jar /app/app.jar --spring.profiles.active=$${SPRING_PROFILES_ACTIVE}" ]
+    command: [ "sh", "-c", "java $${JAVA_OPTS} -Dfile.encoding=UTF-8 -jar /app/app.jar --spring.profiles.active=$${SPRING_PROFILES_ACTIVE}" ]
 
 
 
