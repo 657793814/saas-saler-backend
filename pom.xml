@@ -4,10 +4,10 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.liuzd.soft</groupId>
-    <artifactId>springBootDemo</artifactId>
+    <artifactId>saas-saler-admin</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>springBootTest</name>
-    <description>springBootTest</description>
+    <name>saas-saler-admin</name>
+    <description>saas-saler-admin</description>
     <url/>
     <licenses>
         <license/>
@@ -38,8 +38,6 @@
         <lombok-mapstruct-binding.version>0.2.0</lombok-mapstruct-binding.version>
         <mapstruct-processor.version>1.4.2.Final</mapstruct-processor.version>
         <jodd.version>5.1.6</jodd.version>
-        <grpc.springboot.version>2.15.0.RELEASE</grpc.springboot.version>
-        <grpc.java.version>1.50.2</grpc.java.version>
         <protobuf-maven-plugin.version>0.6.1</protobuf-maven-plugin.version>
         <protobuf.java.version>3.21.12</protobuf.java.version>
         <slf4j.version>2.0.6</slf4j.version>
@@ -191,45 +189,6 @@
             <version>${mysql-connector-java.version}</version>
         </dependency>
 
-        <!-- gRPC Spring Boot Starter -->
-        <dependency>
-            <groupId>net.devh</groupId>
-            <artifactId>grpc-spring-boot-starter</artifactId>
-            <version>${grpc.springboot.version}</version>
-        </dependency>
-
-        <!-- gRPC 服务端依赖 -->
-        <dependency>
-            <groupId>net.devh</groupId>
-            <artifactId>grpc-server-spring-boot-starter</artifactId>
-            <version>${grpc.springboot.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>net.devh</groupId>
-            <artifactId>grpc-server-spring-boot-autoconfigure</artifactId>
-            <version>${grpc.springboot.version}</version>
-        </dependency>
-
-        <!-- gRPC 客户端依赖 -->
-        <dependency>
-            <groupId>net.devh</groupId>
-            <artifactId>grpc-client-spring-boot-starter</artifactId>
-            <version>${grpc.springboot.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>net.devh</groupId>
-            <artifactId>grpc-client-spring-boot-autoconfigure</artifactId>
-            <version>${grpc.springboot.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.google.protobuf</groupId>
-            <artifactId>protobuf-java</artifactId>
-            <version>${protobuf.java.version}</version>
-        </dependency>
-
 
         <!-- fastjson -->
         <dependency>
@@ -330,80 +289,24 @@
                 </configuration>
             </plugin>
             <!-- springboot启动-->
-            <!--            <plugin>-->
-            <!--                <groupId>org.springframework.boot</groupId>-->
-            <!--                <artifactId>spring-boot-maven-plugin</artifactId>-->
-            <!--                <version>2.4.7</version>-->
-            <!--                <configuration>-->
-            <!--                    &lt;!&ndash; 指定该Main Class为全局的唯一入口 &ndash;&gt;-->
-            <!--                    <mainClass>${groupId}.server.StartApplication</mainClass>-->
-            <!--                </configuration>-->
-            <!--                <executions>-->
-            <!--                    <execution>-->
-            <!--                        <goals>-->
-            <!--                            &lt;!&ndash;可以把依赖的包都打包到生成的Jar包中&ndash;&gt;-->
-            <!--                            <goal>repackage</goal>-->
-            <!--                            <goal>build-info</goal>-->
-            <!--                        </goals>-->
-            <!--                    </execution>-->
-            <!--                </executions>-->
-            <!--            </plugin>-->
             <plugin>
-                <groupId>org.xolstice.maven.plugins</groupId>
-                <artifactId>protobuf-maven-plugin</artifactId>
-                <version>${protobuf-maven-plugin.version}</version>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <version>${spring.boot.version}</version>
                 <configuration>
-                    <!--suppress UnresolvedMavenProperty -->
-                    <protocArtifact>com.google.protobuf:protoc:${protobuf.java.version}:exe:${os.detected.classifier}
-                    </protocArtifact>
-                    <pluginId>grpc-java</pluginId>
-                    <!--suppress UnresolvedMavenProperty -->
-                    <pluginArtifact>io.grpc:protoc-gen-grpc-java:${grpc.java.version}:exe:${os.detected.classifier}
-                    </pluginArtifact>
-                    <!-- 添加 Jakarta 注解支持 -->
-                    <writeDescriptorSet>true</writeDescriptorSet>
+                    <!-- 指定该Main Class为全局的唯一入口 -->
+                    <mainClass>${groupId}.SaasSalerAdminApplication</mainClass>
                 </configuration>
                 <executions>
                     <execution>
                         <goals>
-                            <goal>compile</goal>
-                            <goal>compile-custom</goal>
+                            <!--可以把依赖的包都打包到生成的Jar包中-->
+                            <goal>repackage</goal>
+                            <goal>build-info</goal>
                         </goals>
                     </execution>
                 </executions>
             </plugin>
-
-            <!-- 添加 replacer 插件以替换生成代码中的注解 -->
-            <plugin>
-                <groupId>com.google.code.maven-replacer-plugin</groupId>
-                <artifactId>replacer</artifactId>
-                <version>1.5.3</version>
-                <executions>
-                    <execution>
-                        <phase>process-sources</phase>
-                        <goals>
-                            <goal>replace</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <basedir>${project.build.directory}/generated-sources</basedir>
-                    <includes>
-                        <include>**/*.java</include>
-                    </includes>
-                    <replacements>
-                        <replacement>
-                            <token>@javax.annotation.Generated</token>
-                            <value>@jakarta.annotation.Generated</value>
-                        </replacement>
-                        <replacement>
-                            <token>import javax.annotation.Generated</token>
-                            <value>import jakarta.annotation.Generated</value>
-                        </replacement>
-                    </replacements>
-                </configuration>
-            </plugin>
-
             <!-- 打包-->
         </plugins>
     </build>

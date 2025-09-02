@@ -4,17 +4,6 @@ server:
 docker:
   localhost: http://host.docker.internal  #docker 请求宿主机服务的地址，非docker本地ip
 
-# GRPC config
-grpc:
-  server:
-    port: 8081
-    address: 0.0.0.0
-  client:
-    your-service-name:
-      address: 'static://localhost:8081'
-      enable-keep-alive: true
-      keep-alive-without-calls: true
-
 # db config
 db:
   driver: com.mysql.cj.jdbc.Driver

@@ -13,10 +13,10 @@ import org.springframework.cloud.context.config.annotation.RefreshScope;
 @EnableDiscoveryClient
 @EnableRabbit
 @MapperScan("com.liuzd.soft.dao")
-public class SpringBootTestApplication {
+public class SaasSalerAdminApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(SpringBootTestApplication.class, args);
+        SpringApplication.run(SaasSalerAdminApplication.class, args);
     }
 
 }
