@@ -1,2 +1,105 @@
 server:
   port: 8080
+
+docker:
+  localhost: http://host.docker.internal  #docker 请求宿主机服务的地址，非docker本地ip
+
+# db config
+db:
+  driver: com.mysql.cj.jdbc.Driver
+  host: localhost
+  port: 3306
+  user: root
+  pwd: root1234
+  params: characterEncoding=utf8&useSSL=false&serverTimezone=GMT%2B8&rewriteBatchedStatements=true&allowPublicKeyRetrieval=true
+  default_url: jdbc:mysql://${db.host}:${db.port}/saas_center?${db.params}
+  log_db_url: jdbc:mysql://${db.host}:${db.port}/saas_log?${db.params}
+
+spring:
+  datasource:
+    dynamic:
+      aop:
+        # 启用@DS注解的AOP功能动态切换数据源
+        enabled: true
+      # 设置默认的数据源
+      primary: default
+      # 严格模式，未匹配到数据源时是否抛出异常
+      strict: false
+      datasource:
+        # 默认数据源 saas_center库
+        default:
+          driver-class-name: ${db.driver}
+          url: ${db.default_url}
+          username: ${db.user}
+          password: ${db.pwd}
+        # 日志数据源 log库
+        log:
+          driver-class-name: ${db.driver}
+          url: ${db.log_db_url}
+          username: ${db.user}
+          password: ${db.pwd}
+      # druid配置
+      druid:
+        # 监控统计拦截的filters
+        filters: stat
+        # 配置初始化大小/最小/最大
+        initial-size: 1
+        min-idle: 1
+        max-active: 20
+
+  #Spring Cloud Consul for Service Discovery
+  cloud:
+    consul:
+      host: host.docker.internal
+      port: 8501
+      discovery:
+        enable: true
+        register: true
+        healthCheckPath: /actuator/health
+        healthCheckUrl: ${docker.localhost}:${server.port}${spring.cloud.consul.discovery.healthCheckPath}
+        healthCheckInterval: 10s
+        catalog-services-watch:
+          enabled: false
+      config:
+        enabled: true
+
+  # Redis配置
+  data:
+    redis:
+      host: host.docker.internal
+      port: 6379
+      password: # 如果没有密码则留空
+      database: 0
+      timeout: 2000ms
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+          max-wait: -1ms
+
+  rabbitmq:
+    host: host.docker.internal
+    port: 5672
+    username: guest
+    password: guest
+    virtual-host: /
+    # 消息确认配置
+    publisher-confirm-type: correlated
+    publisher-returns: true
+    template:
+      mandatory: true
+
+  # Elasticsearch配置
+  elasticsearch:
+    enabled: false
+    uris: ${docker.localhost}:9200
+    username:
+    password:
+
+# MinIO配置
+minio:
+  endpoint: ${docker.localhost}:9010
+  access-key: minio
+  secret-key: minio123
+  bucket: liuzd-soft
