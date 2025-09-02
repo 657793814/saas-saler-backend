@@ -1,8 +1,9 @@
 version: '3'
 
+# docker network create --driver bridge monitor 创建公用的容器内部网络
 networks:
   monitor:
-    driver: bridge
+    external: true
 
 services:
   saas-app:
