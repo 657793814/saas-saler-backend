@@ -54,6 +54,7 @@ spring:
       port: 8501
       discovery:
         enable: true
+        service-name: ${application.name}-${spring.profiles.active}
         register: true
         healthCheckPath: /actuator/health
         healthCheckUrl: ${docker.localhost}:${server.port}${spring.cloud.consul.discovery.healthCheckPath}
