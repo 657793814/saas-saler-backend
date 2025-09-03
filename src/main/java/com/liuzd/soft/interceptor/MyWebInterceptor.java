@@ -24,6 +24,7 @@ import org.springframework.web.servlet.HandlerInterceptor;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Enumeration;
 import java.util.Set;
 import java.util.UUID;
 
@@ -158,6 +159,19 @@ public class MyWebInterceptor implements HandlerInterceptor {
      * @param request
      */
     private void setCurrentDataSource(HttpServletRequest request) {
+
+        //打印请求头
+        Enumeration<String> headerNames = request.getHeaderNames();
+        if (headerNames != null) {
+            log.info("======= 请求头信息开始 =======");
+            while (headerNames.hasMoreElements()) {
+                String headerName = headerNames.nextElement();
+                String headerValue = request.getHeader(headerName);
+                log.info("{}: {}", headerName, headerValue);
+            }
+            log.info("======= 请求头信息结束 =======");
+        }
+
         if (ObjectUtil.isNotEmpty(ThreadContextHolder.getTenantCode())) {
             dynamicDataSource.switchTenant(ThreadContextHolder.getTenantCode());
             return;
