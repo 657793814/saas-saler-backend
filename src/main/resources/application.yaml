@@ -55,3 +55,16 @@ mybatis-plus:
     map-underscore-to-camel-case: true
     cache-enabled: false
     log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl
+
+# RestTemplate配置
+rest:
+  template:
+    connect-timeout: 5000
+
+# Ribbon负载均衡配置
+ribbon:
+  ConnectTimeout: 3000
+  ReadTimeout: 10000
+  OkToRetryOnAllOperations: false
+  MaxAutoRetries: 0
+  MaxAutoRetriesNextServer: 1
