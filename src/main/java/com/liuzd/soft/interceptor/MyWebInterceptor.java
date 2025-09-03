@@ -51,6 +51,8 @@ public class MyWebInterceptor implements HandlerInterceptor {
             "/swagger",
             "/actuator",
             "/test",
+            "/call_service",
+            "/hello_world",
             "/api/search"
     );
 

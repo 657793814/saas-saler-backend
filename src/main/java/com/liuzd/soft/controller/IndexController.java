@@ -4,12 +4,15 @@ import com.liuzd.soft.annotation.LogAnnotation;
 import com.liuzd.soft.enums.RetEnums;
 import com.liuzd.soft.service.LoginService;
 import com.liuzd.soft.service.Strategies;
+import com.liuzd.soft.service.impl.ServiceCall;
 import com.liuzd.soft.service.impl.StrategiesFactory;
 import com.liuzd.soft.vo.login.LoginReq;
 import com.liuzd.soft.vo.login.RefreshTokenReq;
 import com.liuzd.soft.vo.login.UnLoginReq;
 import com.liuzd.soft.vo.rets.ResultMessage;
+import jakarta.servlet.http.HttpServletRequest;
 import jodd.util.StringUtil;
+import lombok.RequiredArgsConstructor;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,14 +27,22 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping(path = "/")
+@RequiredArgsConstructor
 public class IndexController {
 
     final LoginService loginService;
+    final ServiceCall serviceCall;
 
-    public IndexController(LoginService loginService) {
-        this.loginService = loginService;
+    @RequestMapping(path = "/hello_world")
+    public String helloWorld(HttpServletRequest request) {
+        return request.getServerPort() + " helloWorld";
     }
 
+    @RequestMapping(path = "/call_service")
+    public ResultMessage<Object> callService() {
+        //http://localhost:8080/call_service
+        return ResultMessage.success(serviceCall.callService("saas-saler-admin-prod", "/hello_world"));
+    }
 
     @RequestMapping(path = "/test")
     @LogAnnotation

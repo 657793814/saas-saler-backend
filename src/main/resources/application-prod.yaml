@@ -59,6 +59,7 @@ spring:
         healthCheckPath: /actuator/health
         healthCheckUrl: http://${docker.localhost}:${server.port}${spring.cloud.consul.discovery.healthCheckPath}
         healthCheckInterval: 10s
+        prefer-ip-address: true
         catalog-services-watch:
           enabled: false
       config:
