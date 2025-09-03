@@ -99,7 +99,7 @@ spring:
 
 # MinIO配置
 minio:
-  # 同一个网络通过容器名访问
+  # 同一个网络通过容器名访问, 浏览器访问需要配置一个本地host解析 127.0.0.1 minio
   endpoint: http://minio:9000
   access-key: minio
   secret-key: minio123
