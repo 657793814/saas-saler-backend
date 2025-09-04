@@ -210,9 +210,9 @@ public class ProductServiceImpl implements ProductService {
         product.setThreeCategory(createProductReq.getThreeCategoryId());
         Map<Integer, Integer> map = categoryMap();
         Integer twoCate = map.get(createProductReq.getThreeCategoryId());
-        product.setOneCategory(twoCate);
+        product.setTwoCategory(twoCate);
         Integer oneCate = map.get(twoCate);
-        product.setTwoCategory(oneCate);
+        product.setOneCategory(oneCate);
 
     }
 
