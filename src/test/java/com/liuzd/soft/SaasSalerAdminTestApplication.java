@@ -19,7 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @SpringBootTest
-class SpringBootTestApplicationTests {
+class SaasSalerAdminTestApplication {
 
     @Autowired
     private TUserDao tUserDao;
