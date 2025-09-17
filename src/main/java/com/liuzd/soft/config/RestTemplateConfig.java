@@ -9,6 +9,7 @@ import org.springframework.web.client.RestTemplate;
 
 /**
  * RestTemplate配置类
+ * ps:此项目使用openfeign，不需要配置RestTemplate，这里只做示例用
  */
 @Configuration
 public class RestTemplateConfig {

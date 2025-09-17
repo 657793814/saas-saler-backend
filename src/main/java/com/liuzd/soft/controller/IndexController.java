@@ -1,5 +1,6 @@
 package com.liuzd.soft.controller;
 
+import com.liuzd.soft.feign.UserFeignClient;
 import com.liuzd.soft.service.LoginService;
 import com.liuzd.soft.service.impl.ServiceCall;
 import com.liuzd.soft.vo.login.LoginReq;
@@ -25,6 +26,7 @@ public class IndexController {
 
     final LoginService loginService;
     final ServiceCall serviceCall;
+    final UserFeignClient userFeignClient;
 
     @RequestMapping(path = "/hello_world")
     public String helloWorld(HttpServletRequest request) {
@@ -33,10 +35,15 @@ public class IndexController {
 
     @RequestMapping(path = "/call_service")
     public ResultMessage<Object> callService() {
+        //方式1 ribbon 负载均衡
         //http://localhost:8080/call_service
-        return ResultMessage.success(serviceCall.callService("saas-saler-admin-prod", "/hello_world"));
+        //return ResultMessage.success(serviceCall.callService("saas-saler-admin-prod", "/hello_world"));
+
+        //方式2 openfeign
+        return ResultMessage.success(userFeignClient.helloWorld());
+
     }
-    
+
 
     @RequestMapping(path = "/refresh_token")
     public ResultMessage<Object> refreshToken(
