@@ -154,12 +154,20 @@
             <version>${spring.cloud.consul.version}</version>
         </dependency>
 
+        <!-- spring cloud alibaba ,包含了 nacos ,sentinel ,apollo, zookeeper等-->
         <dependency>
             <groupId>com.alibaba.cloud</groupId>
             <artifactId>spring-cloud-alibaba-dependencies</artifactId>
             <version>${spring.cloud-alibaba.version}</version>
             <type>pom</type>
             <scope>import</scope>
+        </dependency>
+
+        <!-- 引入 sentinel 依赖 -->
+        <dependency>
+            <groupId>com.alibaba.cloud</groupId>
+            <artifactId>spring-cloud-starter-alibaba-sentinel</artifactId>
+            <version>${spring.cloud-alibaba.version}</version>
         </dependency>
 
         <!--SpringBoot集成druid连接池-->

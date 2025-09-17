@@ -64,6 +64,15 @@ spring:
           enabled: false
       config:
         enabled: true
+    # spring cloud Sentinel
+    sentinel:
+      transport:
+        dashboard: host.docker.internal:8858 # 指定 sentinel 控制台服务 的地址
+        port: 8719  # 可以修改为其他端口
+        log:
+          enable: true
+          max-day: 1
+          dir: ./data/logs/sentinel
 
   # Redis配置
   data:

@@ -65,6 +65,16 @@ spring:
       config:
         enabled: true
 
+    # spring cloud Sentinel
+    sentinel:
+      transport:
+        dashboard: 127.0.0.1:8858 # 指定 sentinel 控制台服务 的地址
+        port: 8719
+        log:
+          enable: true
+          max-day: 1
+          dir: ./data/logs/sentinel
+
   # Redis配置
   data:
     redis:
