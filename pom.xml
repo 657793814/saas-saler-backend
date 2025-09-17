@@ -28,6 +28,8 @@
         <spring.cloud-alibaba.version>2022.0.0.0</spring.cloud-alibaba.version>
         <spring.cloud.version>2022.0.0</spring.cloud.version>
         <spring.cloud.consul.version>4.0.0</spring.cloud.consul.version>
+        <spring-cloud-openfeign.version>4.0.0</spring-cloud-openfeign.version>
+        <sentinel.version>1.8.8</sentinel.version>
         <lombok.version>1.18.38</lombok.version>
         <hutool.version>5.8.22</hutool.version>
         <druid.version>1.2.12</druid.version>
@@ -144,6 +146,13 @@
             <version>${spring.cloud.version}</version>
             <type>pom</type>
             <scope>import</scope>
+        </dependency>
+
+        <!-- 引入 feign -->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-openfeign</artifactId>
+            <version>${spring-cloud-openfeign.version}</version>
         </dependency>
 
 
@@ -265,6 +274,14 @@
             <groupId>org.apache.httpcomponents.client5</groupId>
             <artifactId>httpclient5</artifactId>
             <version>${httpclient.version}</version>
+        </dependency>
+
+        <!-- Netty DNS resolver for macOS to fix UnsatisfiedLinkError -->
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-resolver-dns-native-macos</artifactId>
+            <version>4.1.86.Final</version>
+            <classifier>osx-aarch_64</classifier>
         </dependency>
 
     </dependencies>

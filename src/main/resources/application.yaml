@@ -62,9 +62,29 @@ rest:
     connect-timeout: 5000
 
 # Ribbon负载均衡配置
+# Ribbon仅提供负载均衡功能，需手动维护服务清单
 ribbon:
   ConnectTimeout: 3000
   ReadTimeout: 10000
   OkToRetryOnAllOperations: false
   MaxAutoRetries: 0
   MaxAutoRetriesNextServer: 1
+
+# Feign配置 也是基于ribbon实现的
+# Feign在此基础上整合了服务发现能力，通过Spring Cloud Eureka等组件自动更新服务地址，并支持声明式接口定义，大幅降低了微服务调用的复杂度
+feign:
+  client:
+    config:
+      default:
+        connectTimeout: 5000
+        readTimeout: 10000
+        loggerLevel: basic
+  compression:
+    request:
+      enabled: true
+    response:
+      enabled: true
+  httpclient:
+    enabled: true
+    max-connections: 200
+    max-connections-per-route: 50

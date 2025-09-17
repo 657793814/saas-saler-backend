@@ -20,6 +20,9 @@ public class RestTemplateConfig {
      * 配置支持负载均衡的RestTemplate
      *
      * @return
+     * @LoadBalanced 支持负载均衡
+     * @SentinelRestTemplate 注解的属性支持限流(blockHandler, blockHandlerClass)和降级(fallback, fallbackClass)的处理。
+     * 其中 blockHandler 或 fallback 属性对应的方法必须是对应 blockHandlerClass 或 fallbackClass 属性中的静态方法。
      */
     @Bean
     @LoadBalanced
