@@ -31,6 +31,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -61,6 +63,7 @@ public class ProductServiceImpl implements ProductService {
     final ProjectProperties projectProperties;
 
 
+    @Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRED)
     @Override
     public void createProduct(CreateProductReq createProductReq) throws JsonProcessingException {
         String tenantCode = ThreadContextHolder.getTenantCode();
@@ -82,6 +85,7 @@ public class ProductServiceImpl implements ProductService {
         handleProductSku(createProductReq, productId, false);
     }
 
+    @Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRED)
     @Override
     public void editProduct(CreateProductReq editProductReq) throws JsonProcessingException {
         Assert.notNull(editProductReq.getId(), () -> MyException.exception(RetEnums.PRODUCT_EDIT_ERROR));
@@ -106,7 +110,7 @@ public class ProductServiceImpl implements ProductService {
 
     }
 
-    private void handleProductSku(CreateProductReq createProductReq, int productId, boolean isEdit) throws JsonProcessingException {
+    public void handleProductSku(CreateProductReq createProductReq, int productId, boolean isEdit) throws JsonProcessingException {
         for (SkuInfo skuInfo : createProductReq.getSkus()) {
 
             PItemsEntity item = new PItemsEntity();

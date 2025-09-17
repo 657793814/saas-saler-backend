@@ -28,6 +28,8 @@ import jodd.util.StringUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.util.Objects;
@@ -79,6 +81,7 @@ public class UserServiceImpl extends ServiceImpl<TUserDao, TUserEntity> implemen
     }
 
     @LogAnnotation
+    @Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRED)
     @Override
     public void addUser(AddUserReq addUserReq) {
 
