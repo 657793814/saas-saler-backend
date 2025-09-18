@@ -55,6 +55,7 @@ spring:
       discovery:
         enable: true
         register: true
+        instance-id: ${application.name}-${spring.profiles.active}-${random.value}
         service-name: ${application.name}-${spring.profiles.active}
         healthCheckPath: /actuator/health
         # 移除healthCheckUrl配置，让Consul使用默认的服务发现机制进行健康检查
