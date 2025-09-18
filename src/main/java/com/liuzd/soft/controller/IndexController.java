@@ -1,6 +1,6 @@
 package com.liuzd.soft.controller;
 
-import com.liuzd.soft.feign.UserFeignClient;
+import com.liuzd.soft.feign.BuyerFeignClient;
 import com.liuzd.soft.service.LoginService;
 import com.liuzd.soft.service.impl.ServiceCall;
 import com.liuzd.soft.vo.login.LoginReq;
@@ -26,7 +26,7 @@ public class IndexController {
 
     final LoginService loginService;
     final ServiceCall serviceCall;
-    final UserFeignClient userFeignClient;
+    final BuyerFeignClient buyerFeignClient;
 
     @RequestMapping(path = "/hello_world")
     public String helloWorld(HttpServletRequest request) {
@@ -40,7 +40,7 @@ public class IndexController {
         //return ResultMessage.success(serviceCall.callService("saas-saler-admin-prod", "/hello_world"));
 
         //方式2 openfeign
-        return ResultMessage.success(userFeignClient.helloWorld());
+        return ResultMessage.success(buyerFeignClient.helloWorld());
 
     }
 
