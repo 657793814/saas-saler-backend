@@ -69,22 +69,3 @@ ribbon:
   OkToRetryOnAllOperations: false
   MaxAutoRetries: 0
   MaxAutoRetriesNextServer: 1
-
-# Feign配置 也是基于ribbon实现的
-# Feign在此基础上整合了服务发现能力，通过Spring Cloud Eureka等组件自动更新服务地址，并支持声明式接口定义，大幅降低了微服务调用的复杂度
-feign:
-  client:
-    config:
-      default:
-        connectTimeout: 5000
-        readTimeout: 10000
-        loggerLevel: basic
-  compression:
-    request:
-      enabled: true
-    response:
-      enabled: true
-  httpclient:
-    enabled: true
-    max-connections: 200
-    max-connections-per-route: 50

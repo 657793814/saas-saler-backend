@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.GetMapping;
  * @date: 2025/9/17
  * @email: liuzd2025@qq.com
  * @desc FeignClient 配置
- * name: consul注册的微服务名（基于consul等服务发现机制的负载均衡）
+ * name: consul注册的微服务名（基于consul的服务发现机制实现的负载均衡）
  */
 @FeignClient(name = "saas-saler-admin-prod", configuration = FeignClientInterceptor.class)
 @Component
