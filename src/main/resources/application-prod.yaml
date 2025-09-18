@@ -57,7 +57,9 @@ spring:
         register: true
         service-name: ${application.name}-${spring.profiles.active}
         healthCheckPath: /actuator/health
-        healthCheckUrl: http://${docker.localhost}:${server.port}${spring.cloud.consul.discovery.healthCheckPath}
+        # 移除healthCheckUrl配置，让Consul使用默认的服务发现机制进行健康检查
+        # 这样Consul会自动通过服务名和注册的端口进行健康检查
+        # healthCheckUrl: http://${docker.localhost}:${server.port}${spring.cloud.consul.discovery.healthCheckPath}
         healthCheckInterval: 10s
         prefer-ip-address: true
         catalog-services-watch:
